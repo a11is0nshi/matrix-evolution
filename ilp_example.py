@@ -8,8 +8,8 @@ try:
    # Create a new model
    m = Model("mip1")
    # Create variables
-   x = m.addVar(vtype=GRB.BINARY, name="x")
-   y = m.addVar(vtype=GRB.BINARY, name="y")
+   x = m.addVar(vtype=GRB.INTEGER, name="x")
+   y = m.addVar(vtype=GRB.INTEGER, name="y")
     
    # Set objective
    m.setObjective(5 * x + 8 * y, GRB.MAXIMIZE)
