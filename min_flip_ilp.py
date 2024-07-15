@@ -8,7 +8,7 @@ try:
    y = m.addVar(vtype=GRB.BINARY, name="y")
     
    # Set objective
-   m.setObjective(5 * x + 8 * x, GRB.MAXIMIZE)
+   m.setObjective(5 * x + 8 * y, GRB.MAXIMIZE)
 
    # Add constraint:
    m.addConstr(x + y <= 6, "c0")
