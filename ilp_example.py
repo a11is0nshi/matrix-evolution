@@ -1,3 +1,7 @@
+"""
+Attempt to implement ILP example from Dr. Yaw's slides
+"""
+
 from gurobipy import *
 
 try:
@@ -18,7 +22,7 @@ try:
    m.addConstr(x >= 0, "c2")
    m.addConstr(y >= 0, "c3")
 
-   m.update()
+   # m.update()
    m.optimize()
 
    for v in m.getVars():
