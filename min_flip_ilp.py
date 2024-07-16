@@ -22,10 +22,14 @@ try:
     D = np.random.choice(2, m*n).reshape((m, n))
 
     # Create a new model
-    model = Model("mip1")
+    model = Model("min_flip_model")
 
     # X is constrained to be a conflict free matrix
-    X = model.addMVar((m,n), vtype=GRB.BINARY)
+    X = model.addMVar((m,n), vtype=GRB.BINARY, name="X")
+
+    # Set objective function
+    total = sum(sum(D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) + D[i, j]*(X[i, j]) for j in range(n)) for i in range(m))
+    model.setObjective(total, GRB.MINIMIZE)
     
     """
     # Initialize values of X
@@ -35,14 +39,9 @@ try:
             model.addVar(vtype=GRB.BINARY, name=f"X[{i}, {j}]")
     """
     
-    B01 = np.zeros((n, n), dtype=object)
-    B10 = np.zeros((n, n), dtype=object)
-    B11 = np.zeros((n, n), dtype=object)
-    for p in range(n):
-        for q in range(p+1, n):
-            B01[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B01[{p}, {q}]")
-            B10[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B10[{p}, {q}]")
-            B11[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B11[{p}, {q}]")
+    B01 = model.addMVar((n,n), vtype=GRB.BINARY, name="B01")
+    B10 = model.addMVar((n,n), vtype=GRB.BINARY, name="B10")
+    B11 = model.addMVar((n,n), vtype=GRB.BINARY, name="B11")
 
     # Add constraints to ensure that there is no conflict involving cols p and q. 
     count = 0
@@ -58,11 +57,6 @@ try:
                 model.addConstr(B01[p,q] + B10[p,q] + B11[p,q] <= 2, f"c{count}")
                 count += 1
     
-    # Set objective function - equal to num of bit flips?    
-   
-    total = sum(sum(D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) + D[i, j]*(X[i, j]) for j in range(n)) for i in range(m))
-    
-    model.setObjective(total, GRB.MINIMIZE)
     model.optimize()
     # Print results
     for v in model.getVars():
