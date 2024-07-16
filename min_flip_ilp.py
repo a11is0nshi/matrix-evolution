@@ -19,7 +19,7 @@ def b_func(X, p, q, a, b):
 try:
     m = 6
     n = 4
-    # m x n binary matrix from random 1-d array with vals in np.arange(2)
+    # random binary matrix of size m x n
     # rows correspond to sequenced single cells, columns to mutations
     D = np.random.choice(2, m*n).reshape((m, n))
 
