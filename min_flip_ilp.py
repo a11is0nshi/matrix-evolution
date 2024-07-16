@@ -1,7 +1,5 @@
 """
-Implementation of ILP from Tumor Evolution paper (Malikic et. al, 867-868)
-This ILP formulation searches for the conflict-free matrix X for which 
-P(D | X) is maximized. 
+ILP Implementation inspired by (Malikic et. al, 867-868) paper
 """
 from gurobipy import *
 import numpy as np
@@ -49,13 +47,13 @@ try:
                 model.addConstr(b_func(X, p, q, 0, 1) + b_func(X, p, q, 1, 0) + b_func(X, p, q, 1, 1) <= 2, f"c{count}")
                 count += 1
     
-    # Set objective function
+    # Set objective function - equal to num of bit flips?
     total = 0
     for i in range(m):
         for j in range(n):
             total += D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) + D[i, j]*(X[i, j])
     
-    model.setObjective(total, GRB.MAXIMIZE)
+    model.setObjective(total, GRB.MINIMIZE)
 
     # Print results
     for v in model.getVars():
