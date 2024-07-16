@@ -46,16 +46,17 @@ try:
     # Add constraints to ensure that there is no conflict involving cols p and q. 
     count = 0
     for p in range(n):
-        for q in range(p+1, n):
-            for i in range(m):
-                model.addConstr(-1 * X[i, p] + X[i, q] <= B01[p,q], f"c{count}")
-                count += 1
-                model.addConstr(X[i, p] - X[i, q] <= B10[p,q], f"c{count}")
-                count += 1
-                model.addConstr(X[i, p] + X[i, q] - 1 <= B11[p,q], f"c{count}")
-                count += 1
-                model.addConstr(B01[p,q] + B10[p,q] + B11[p,q] <= 2, f"c{count}")
-                count += 1
+        for q in range(n):
+            if p != q:
+                for i in range(m):
+                    model.addConstr(-1 * X[i, p] + X[i, q] <= B01[p,q], f"c{count}")
+                    count += 1
+                    model.addConstr(X[i, p] - X[i, q] <= B10[p,q], f"c{count}")
+                    count += 1
+                    model.addConstr(X[i, p] + X[i, q] - 1 <= B11[p,q], f"c{count}")
+                    count += 1
+                    model.addConstr(B01[p,q] + B10[p,q] + B11[p,q] <= 2, f"c{count}")
+                    count += 1
     
     model.optimize()
     # Print results
