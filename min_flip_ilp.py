@@ -56,13 +56,9 @@ try:
                 model.addConstr(B01[p,q] + B10[p,q] + B11[p,q] <= 2, f"c{count}")
                 count += 1
     
-    # Set objective function - equal to num of bit flips?
-    total = 0
-    I = []
-    J = []
+    # Set objective function - equal to num of bit flips?    
    
-    for i in range(m):
-        total = quicksum(D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) + D[i, j]*(X[i, j]) for i in I ) 
+    total = quicksum(quicksum(D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) + D[i, j]*(X[i, j]) for j in range(i+1, n)) for i in range(m))
     
     model.setObjective(total, GRB.MINIMIZE)
     model.optimize()
