@@ -27,11 +27,13 @@ try:
     # X is constrained to be a conflict free matrix
     X = model.addMVar((m,n), vtype=GRB.BINARY)
     
+    """
     # Initialize values of X
     for i in range(m):
         for j in range(n):
             # Create variables (entries of X)
             model.addVar(vtype=GRB.BINARY, name=f"X[{i}, {j}]")
+    """
     
     B01 = np.zeros((n, n), dtype=object)
     B10 = np.zeros((n, n), dtype=object)
@@ -47,7 +49,7 @@ try:
     for p in range(n):
         for q in range(p+1, n):
             for i in range(m):
-                model.addConstr(-X[i, p] + X[i, q] <= B01[p,q], f"c{count}")
+                model.addConstr(-1 * X[i, p] + X[i, q] <= B01[p,q], f"c{count}")
                 count += 1
                 model.addConstr(X[i, p] - X[i, q] <= B10[p,q], f"c{count}")
                 count += 1
@@ -58,13 +60,13 @@ try:
     
     # Set objective function - equal to num of bit flips?    
    
-    total = quicksum(quicksum(D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) + D[i, j]*(X[i, j]) for j in range(n)) for i in range(m))
+    total = sum(sum(D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) + D[i, j]*(X[i, j]) for j in range(n)) for i in range(m))
     
     model.setObjective(total, GRB.MINIMIZE)
     model.optimize()
     # Print results
-    #for v in model.getVars():
-       # print(v.varName, v.x)
+    for v in model.getVars():
+       print(v.varName, v.x)
     
     print(D)
     print('Optimal Objective function value:', model.getObjective())
