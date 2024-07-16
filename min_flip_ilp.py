@@ -1,6 +1,6 @@
 """
 ILP Implementation inspired by (Malikic et. al, 867-868) paper. 
-This implementation sets D to be a random binary m by n matrix, where there are 
+This implementation sets D to be a random binary m x n matrix, where there are 
 m sequenced single cells and n mutations
 
 """
@@ -8,14 +8,14 @@ from gurobipy import *
 import numpy as np
 
 try:
-    # D random binary matrix of size m x n
+    # D is a randomly generated m x n binary matrix
     m = 6
     n = 4
     D = np.random.choice(2, m*n).reshape((m, n))
 
     model = Model("min_flip_model")
 
-    # X is coflict free matrix by constraints
+    # X is a conflict free matrix by constraints
     X = model.addMVar((m,n), vtype=GRB.BINARY, name="X")
 
     # Objective function
@@ -25,8 +25,6 @@ try:
     B01 = model.addMVar((n,n), vtype=GRB.BINARY, name="B01")
     B10 = model.addMVar((n,n), vtype=GRB.BINARY, name="B10")
     B11 = model.addMVar((n,n), vtype=GRB.BINARY, name="B11")
-
-    model.update()
 
     # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
     model.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(n) for q in range(n) for i in range(m) if p != q)
