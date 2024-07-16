@@ -40,9 +40,9 @@ try:
     B11 = np.zeros((n, n), dtype=object)
     for p in range(n):
         for q in range(p+1, n):
-            B01[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B[{p}, {q}, 0, 1]")
-            B10[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B[{p}, {q}, 1, 0]")
-            B11[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B[{p}, {q}, 1, 1]")
+            B01[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B01[{p}, {q}]")
+            B10[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B10[{p}, {q}]")
+            B11[p, q] = model.addVar(vtype=GRB.BINARY, name=f"B11[{p}, {q}]")
 
     # Add constraints to ensure that there is no conflict involving cols p and q. 
     count = 0
