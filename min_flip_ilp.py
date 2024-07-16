@@ -21,17 +21,17 @@ try:
     # rows correspond to sequenced single cells, columns to mutations
     D = np.random.choice(2, m*n).reshape((m, n))
 
-    # X is constrained to be a conflict free matrix
-    X = np.zeros((m, n), dtype=object)
-
     # Create a new model
     model = Model("mip1")
+
+    # X is constrained to be a conflict free matrix
+    X = model.addMVar((m,n), vtype=GRB.BINARY)
     
     # Initialize values of X
     for i in range(m):
         for j in range(n):
             # Create variables (entries of X)
-            X[i, j] = model.addVar(vtype=GRB.BINARY, name=f"X[{i}, {j}]")
+            model.addVar(vtype=GRB.BINARY, name=f"X[{i}, {j}]")
     
     B01 = np.zeros((n, n), dtype=object)
     B10 = np.zeros((n, n), dtype=object)
@@ -47,7 +47,7 @@ try:
     for p in range(n):
         for q in range(p+1, n):
             for i in range(m):
-                model.addConstr(-1 * X[i, p] + X[i, q] <= B01[p,q], f"c{count}")
+                model.addConstr(-X[i, p] + X[i, q] <= B01[p,q], f"c{count}")
                 count += 1
                 model.addConstr(X[i, p] - X[i, q] <= B10[p,q], f"c{count}")
                 count += 1
