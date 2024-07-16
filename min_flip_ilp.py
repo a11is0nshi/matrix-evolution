@@ -47,7 +47,7 @@ try:
        print(v.varName, v.x)
     
     print(D)
-    print('Optimal Objective function value:', model.getObjective())
+    print('Optimal Objective function value:', model.objVal)
 
 except GurobiError as ex:
     print('*********ERROR*********')
