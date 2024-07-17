@@ -6,12 +6,13 @@ m sequenced single cells and n mutations
 """
 from gurobipy import *
 import numpy as np
+import process_data as p
 
 try:
-    # D is a randomly generated m x n binary matrix
-    m = 6
-    n = 4
-    D = np.random.choice(2, m*n).reshape((m, n))
+    # D is input binary matrix
+    D = p.get_binary_matrix()
+    m, n = D.shape[0], D.shape[1]
+    print(m, n)
 
     model = Model("min_flip_model")
 
