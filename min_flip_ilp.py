@@ -12,7 +12,6 @@ try:
     # D is input binary matrix
     D = p.get_binary_matrix()
     m, n = D.shape[0], D.shape[1]
-    print(m, n)
 
     model = Model("min_flip_model")
 
