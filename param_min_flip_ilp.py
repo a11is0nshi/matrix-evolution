@@ -42,8 +42,8 @@ try:
    # Essential Partial Order Constraints
     model.addConstr(z[i] <= (X[u, i] - X[v, i] + 1)/2 for i in range(m))
     model.addConstr(sum(z[i] for i in range(m)) >= 1)
-    model.addConstr(u <= m)
-    model.addConstr(v <= m)
+    model.addConstr(0 <= u < m)
+    model.addConstr(0 <= v < m)
     model.addConstr(v != u)
     model.optimize()
     
