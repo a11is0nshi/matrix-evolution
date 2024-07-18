@@ -7,10 +7,14 @@ m sequenced single cells and n mutations
 from gurobipy import *
 import numpy as np
 import process_data as p
+import pandas as pd
 
+def get_phyolin_matrix(name):
+    df = pd.read_csv(name)
+    return df.to_numpy()
 try:
     # D is input binary matrix
-    D = p.get_binary_matrix()
+    D = get_phyolin_matrix("Patient6_phyolin.csv")
     m, n = D.shape[0], D.shape[1]
 
     model = Model("min_flip_model")
@@ -34,12 +38,20 @@ try:
     
     model.optimize()
     
+    f = open("Patient_6_Results.txt", "w")
     # Print results
-    for v in model.getVars():
-       print(v.varName, v.x)
-    
-    print(D)
-    print('Optimal Objective function value:', model.objVal)
+    f.write("D")
+    D_str = np.array2string(D, threshold = np.inf)
+    f.write(f"\n{D_str} \n \n")
+    f.write("X")
+    # values = model.getAttr("X", model.getVars())
+    # values = np.array(values).reshape((m, n))
+    X_str = np.array2string(X.X, threshold = np.inf)
+    f.write(f"\n{X_str} \n \n")
+    f.write("Optimal Objective function value: \n")
+    f.write(str(model.objVal))
+    f.close()
+
 
 except GurobiError as ex:
     print('*********ERROR*********')
