@@ -5,12 +5,17 @@ m sequenced single cells and n mutations
 
 """
 from gurobipy import *
+from sys import * 
 import numpy as np
-import process_data as p
+import pandas as pd
+
+def get_phyolin_matrix(name):
+    df = pd.read_csv(name)
+    return df.to_numpy()
 
 try:
     # D is input binary matrix
-    D = p.get_binary_matrix()
+    D = get_phyolin_matrix("Patient2_phyolin.csv")
     m, n = D.shape[0], D.shape[1]
 
     model = Model("min_flip_model")
