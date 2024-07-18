@@ -31,7 +31,8 @@ try:
     B11 = model.addMVar((n,n), vtype=GRB.BINARY, name="B11")
 
     z = model.addMVar((1, m), vtype =GRB.BINARY, name="z")
-
+    u = model.addVar(vtype=GRB.INTEGER, name="u")
+    v = model.addVar(vtype=GRB.INTEGER, name="v")
     # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
     model.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(n) for q in range(n) for i in range(m) if p != q)
     model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(n) for q in range(n) for i in range(m) if p != q)
