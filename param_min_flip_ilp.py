@@ -19,8 +19,7 @@ try:
     m, n = D.shape[0], D.shape[1]
 
     model = Model("min_flip_model")
-
-    # X is a conflict free matrix by constraints
+  # X is a conflict free matrix by constraints
     X = model.addMVar((m,n), vtype=GRB.BINARY, name="X")
 
     # Objective function
@@ -31,17 +30,22 @@ try:
     B10 = model.addMVar((n,n), vtype=GRB.BINARY, name="B10")
     B11 = model.addMVar((n,n), vtype=GRB.BINARY, name="B11")
 
+    z = model.addMVar((1, m), vtype =GRB.BINARY, name="z")
+
     # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
     model.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(n) for q in range(n) for i in range(m) if p != q)
     model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(n) for q in range(n) for i in range(m) if p != q)
     model.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(n) for q in range(n) for i in range(m) if p != q)
     model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(n) for q in range(n) if p != q)
-    
+   
+   # Essential Partial Order Constraints
+    model.addConstr(z[i] <= (X[u, i] - X[v, i] + 1)/2 for i in range(m))
+    model.addConstr(sum(z[i] for i in range(m)) >= 1)
     model.optimize()
     
     # Print results
-    for v in model.getVars():
-       print(v.varName, v.x)
+    for y in model.getVars():
+       print(y.varName, y.x)
     
     print(D)
     print('Optimal Objective function value:', model.objVal)
