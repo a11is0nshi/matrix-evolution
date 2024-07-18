@@ -44,7 +44,7 @@ try:
     model.addConstr(sum(z[i] for i in range(m)) >= 1)
     model.addConstr(u <= m)
     model.addConstr(v <= m)
-    model.addConstr(v + u <= m)
+    model.addConstr(v != u)
     model.optimize()
     
     # Print results
