@@ -9,8 +9,6 @@ from sys import *
 import numpy as np
 import pandas as pd
 
-
-
 def getMatrix(name):
     df = pd.read_csv(name)
     return df.to_numpy()
@@ -112,7 +110,14 @@ def GetRelated(u, V):
             return np.concatenate(GetRelated(u, Vl), GetRelated(u, Vr))
         
 def GetEssential(D, k):
-    pass
+    S = {num+1 for num in range(D.shape[0])}
+    ess_set = {}
+    R = dict()
+    for u in S:
+        R[u] = GetRelated(u, S.difference({u}))
+        ess_set = ess_set.union({(u, y) for y in R[u]})
+    return ess_set
+
 
 D = getMatrix("nameoffile")
 k = 10
