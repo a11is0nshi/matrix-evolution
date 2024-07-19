@@ -16,19 +16,15 @@ def getMatrix(name):
 # D is input binary matrix
 D = getMatrix("Patient2_phyolin.csv")
 
-# given a Matrix M and an index u, getV(M, u) returns V = M \ M[u]
-def getV(D, u):
-    return np.delete(D, u, 0)
-
-def ILPincreased(u, V):
-    N = len(V)      # num of samples - rows
+def ILPincreased(u, Vset):
+    N = len(Vset)      # num of samples - rows
     M = D.shape[1]  # num of mutations - cols
 
     # Populate VMatrix - extracts certain rows of D matrix
-    VMatrix = np.zeros((N, M), dtype=int)
+    V = np.zeros((N, M), dtype=int)
     row_index = 0
     for i in V:
-        VMatrix[row_index] = D[i]
+        V[row_index] = D[i-1]
         row_index = row_index + 1
 
     try:
@@ -51,9 +47,9 @@ def ILPincreased(u, V):
         B10 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B10")
         B11 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B11")
 
-        B012 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B01")
-        B102 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B10")
-        B112 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B11")
+        B012 = m2.addMVar((M,M), vtype=GRB.BINARY, name="B01")
+        B102 = m2.addMVar((M,M), vtype=GRB.BINARY, name="B10")
+        B112 = m2.addMVar((M,M), vtype=GRB.BINARY, name="B11")
 
         z = m2.addMVar((1, N), vtype =GRB.BINARY, name="z")
         u = m2.addVar(vtype=GRB.INTEGER, name="u")
@@ -116,12 +112,13 @@ def GetEssential(D, k):
     ess_set = {}
     R = []
     for u in S:
-        R.append(GetRelated(u, S.difference({u})))
+        V = S.difference({u})
+        R.append(GetRelated(u, V))
         ess_set = ess_set.union({(u, y) for y in R[u]})
     return ess_set
 
 
-D = getMatrix("nameoffile")
+D = getMatrix("small_test.csv")
 k = 10
 print(GetEssential(D, k))
 
