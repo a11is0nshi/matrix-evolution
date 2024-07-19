@@ -46,8 +46,9 @@ def ILP(u, Vset, prime):
 
         # Essential Partial Order Constraints
         if prime:
-            z = m.addMVar(N, vtype =GRB.BINARY, name="z")
-            m.addConstrs(z[i] <= (X[u, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
+            z = m.addMVar((N,), vtype =GRB.BINARY, name="z")
+            print(z)
+            m.addConstrs(z[i] <= (X[u-1, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
             m.addConstr(sum(z[i] for i in range(N)) >= 1)
 
         m.optimize()
@@ -71,7 +72,7 @@ def Split(V):
 # outputs all samples v ∈ V such that u <e v
 def GetRelated(u, V):
     if ILPincreased(u, V):
-        if V.shape[0] == 1:
+        if len(V) == 1:
             return V
         else:
             Vl, Vr = Split(V)
