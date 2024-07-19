@@ -10,7 +10,8 @@ import numpy as np
 import pandas as pd
 
 # Change name var to change file
-name = "Patient2_phyolin.csv"
+name = "small_test"
+k = 10
 
 def getMatrix(name):
     df = pd.read_csv(name)
@@ -73,10 +74,22 @@ def Split(V):
 def GetRelated(u, V):
     if ILPincreased(u, V):
         if len(V) == 1:
-            return V
+            if V == None:
+                return {}
+            else:
+                return V
         else:
             Vl, Vr = Split(V)
-            return GetRelated(u, Vl).union(GetRelated(u, Vr))
+            left = GetRelated(u, Vl)
+            right = (GetRelated(u, Vr))
+            if left == None and right == None: 
+                return {}
+            elif left == None: 
+                return right
+            elif right == None:
+                return left 
+            else:
+                return left.union(right)
         
 # Given a matrix D and positive integer k, GetEssential(D, k) outputs the 
 # the <e relation
@@ -87,17 +100,16 @@ def GetEssential(D, k):
     R = []
     for u in S:
         V = S.difference({u})
+        print(f"GetRelated({u},{V}: {GetRelated(u, V)})")
         R.append(GetRelated(u, V))
-        if R[-1] == None:
-            print(f"u: {u}, V: {V}")
         print(F"R : {R}")
         P = {(u, y) for y in R[u-1]}
         temp = ess_set.union(P)
         ess_set = temp
     return ess_set
 
-D = getMatrix("small_test.csv")
-k = 10
+
+D = getMatrix(name)
 print(f"GetEssential: {GetEssential(D, k)}")
 
 
