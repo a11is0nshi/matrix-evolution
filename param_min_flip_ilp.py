@@ -99,11 +99,13 @@ def GetRelated(u, V):
 # the <e relation
 def GetEssential(D, k):
     S = {num+1 for num in range(D.shape[0])}
+    print(f"S : {S}")
     ess_set = set()
     R = []
     for u in S:
         V = S.difference({u})
         R.append(GetRelated(u, V))
+        print(F"R : {R}")
         P = {(u, y) for y in R[u-1]}
         temp = ess_set.union(P)
         ess_set = temp
