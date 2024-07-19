@@ -19,66 +19,48 @@ def getMatrix(name):
 # D is input binary matrix
 D = getMatrix(name)
 
-def ILPincreased(u, Vset):
+def ILP(u, Vset, prime):
     N = D.shape[0]  # num of samples - rows
     M = D.shape[1]  # num of mutations - cols
 
     try:
-        ma = Model("min_flip_model1")
-        mb = Model("min_flip_model2")
+        m = Model("min_flip_model")
     
         # X is a conflict free matrix by constraints
-        X = ma.addMVar((N, M), vtype=GRB.BINARY, name="X")
-        Y = mb.addMVar((N, M), vtype=GRB.BINARY, name="Y")
+        X = m.addMVar((N, M), vtype=GRB.BINARY, name="X")
 
-        # Objective function - row
-        totala = sum(sum((1 - D[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
-        ma.setObjective(totala, GRB.MINIMIZE)
-
-        # Objective function - row prime
-        totalb = sum(sum((1 - D[i, j])*(Y[i, j]) for j in range(M)) for i in range(N))
-        mb.setObjective(totalb, GRB.MINIMIZE)
+        # Objective function
+        total = sum(sum((1 - D[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
+        m.setObjective(total, GRB.MINIMIZE)
         
-        B01a = ma.addMVar((M,M), vtype=GRB.BINARY, name="B01a")
-        B10a = ma.addMVar((M,M), vtype=GRB.BINARY, name="B10a")
-        B11a = ma.addMVar((M,M), vtype=GRB.BINARY, name="B11a")
+        # Add auxillary constraints
+        B01 = m.addMVar((M,M), vtype=GRB.BINARY, name="B01")
+        B10 = m.addMVar((M,M), vtype=GRB.BINARY, name="B10")
+        B11 = m.addMVar((M,M), vtype=GRB.BINARY, name="B11")
 
-        B01b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B01b")
-        B10b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B10b")
-        B11b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B11b")
-
-        z = mb.addMVar(N, vtype =GRB.BINARY, name="z")
         # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
-        ma.addConstrs(-1 * X[i, p] + X[i, q] <= B01a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        ma.addConstrs(X[i, p] - X[i, q] <= B10a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        ma.addConstrs(X[i, p] + X[i, q] - 1 <= B11a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        ma.addConstrs(B01a[p,q] + B10a[p,q] + B11a[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
+        m.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        m.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        m.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
 
-        mb.addConstrs(-1 * Y[i, p] + Y[i, q] <= B01b[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        mb.addConstrs(Y[i, p] - Y[i, q] <= B10b[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        mb.addConstrs(Y[i, p] + Y[i, q] - 1 <= B11b[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        mb.addConstrs(B01b[p,q] + B10b[p,q] + B11b[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
-    
         # Essential Partial Order Constraints
-        mb.addConstrs(z[i] <= (Y[u, i] - Y[v-1, i] + 1)/2 for i in range(N) for v in Vset)
-        mb.addConstr(sum(z[i] for i in range(N)) >= 1)
+        if prime:
+            z = m.addMVar(N, vtype =GRB.BINARY, name="z")
+            m.addConstrs(z[i] <= (X[u, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
+            m.addConstr(sum(z[i] for i in range(N)) >= 1)
 
-        ma.optimize()
-        mb.optimize()
-
-       
-        if ma.Status == GRB.OPTIMAL and mb.Status == GRB.OPTIMAL:
-            if ma.ObjVal < mb.ObjVal:
-                return True
-            else:
-                return False
-        else:
-            print("No optimal solution found")
-            return False
+        m.optimize()
+        return m.ObjVal
 
     except GurobiError as ex:
         print('*********ERROR*********')
         print(ex)
+
+def ILPincreased(u, Vset):
+    r1 = ILP(u, Vset, False)
+    r2 = ILP(u, Vset, True)
+    return r1 < r2
 
 def Split(V):
     V = list(V)
