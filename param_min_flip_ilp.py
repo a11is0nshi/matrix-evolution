@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 # Change name var to change file
-name = "small_test"
+name = "small_test.csv"
 k = 10
 
 def getMatrix(name):
@@ -72,24 +72,34 @@ def Split(V):
 # Given a sample index u and set of test sample indices V, GetRelated(u, V) 
 # outputs all samples v ∈ V such that u <e v
 def GetRelated(u, V):
-    if ILPincreased(u, V):
+    if ILPincreased(u, V): 
         if len(V) == 1:
-            if V == None:
-                return {}
-            else:
-                return V
-        else:
+            return V
+        else: 
             Vl, Vr = Split(V)
-            left = GetRelated(u, Vl)
-            right = (GetRelated(u, Vr))
-            if left == None and right == None: 
-                return {}
-            elif left == None: 
-                return right
-            elif right == None:
-                return left 
-            else:
-                return left.union(right)
+            return GetRelated(u, Vl).union(GetRelated(u, Vr))
+    else: 
+        return {}
+    # if ILPincreased(u, V):
+    #     if len(V) == 1:
+    #         if V == None:
+    #             return {}
+    #         else:
+    #             return V
+    #     else:
+    #         Vl, Vr = Split(V)
+    #         left = GetRelated(u, Vl)
+    #         right = (GetRelated(u, Vr))
+    #         if left == None and right == None: 
+    #             return {}
+    #         elif left == None: 
+    #             return right
+    #         elif right == None:
+    #             return left 
+    #         else:
+    #             return left.union(right)
+    # else: 
+    #     return {}
         
 # Given a matrix D and positive integer k, GetEssential(D, k) outputs the 
 # the <e relation
