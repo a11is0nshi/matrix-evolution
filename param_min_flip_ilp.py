@@ -44,6 +44,7 @@ def ILP(u, Vset, prime):
         m.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
         m.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
         m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
+        m.addConstrs(sum(D[i, j] * (1-X[i, j]) for i in range(N) for j in range(M)) <= k)
 
         # Essential Partial Order Constraints
         if prime:
