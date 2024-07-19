@@ -62,11 +62,18 @@ def ILPincreased(u, Vset):
         # Essential Partial Order Constraints
         mb.addConstrs(z[i] <= (Y[u, i] - Y[v-1, i] + 1)/2 for i in range(N) for v in Vset)
         mb.addConstr(sum(z[i] for i in range(N)) >= 1)
-     
-    
-        if ma.objVal < mb.objVal:
-            return True
-        else: 
+
+        ma.optimize()
+        mb.optimize()
+
+       
+        if ma.Status == GRB.OPTIMAL and mb.Status == GRB.OPTIMAL:
+            if ma.ObjVal < mb.ObjVal:
+                return True
+            else:
+                return False
+        else:
+            print("No optimal solution found")
             return False
 
     except GurobiError as ex:
