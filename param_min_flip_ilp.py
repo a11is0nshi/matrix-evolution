@@ -22,9 +22,15 @@ def getV(D, u):
 
 
 def ILPincreased(u, V):
+
+    VMatrix = np.matrix(len(V), D.shape[1])
+    row = 0
+    for i in V:
+        VMatrix[row] = D[i]
+        row = row + 1
     try:
-        N = D.shape[0]      # num of samples - rows
-        M = D.shape[1]      # num of mutations - cols
+        N = VMatrix.shape[0]      # num of samples - rows
+        M = VMatrix.shape[1]      # num of mutations - cols
 
         m1 = Model("min_flip_model1")
         m2 = Model("min_flip_model2")
