@@ -99,17 +99,19 @@ def GetRelated(u, V):
 # the <e relation
 def GetEssential(D, k):
     S = {num+1 for num in range(D.shape[0])}
-    ess_set = {}
+    ess_set = set()
     R = []
     for u in S:
         V = S.difference({u})
         R.append(GetRelated(u, V))
-        ess_set = ess_set.union({(u, y) for y in R[u]})
+        P = {(u, y) for y in R[u-1]}
+        temp = ess_set.union(P)
+        ess_set = temp
     return ess_set
 
 
 D = getMatrix("small_test.csv")
 k = 10
-print(GetEssential(D, k))
+print(f"GetEssential: {GetEssential(D, k)}")
 
 

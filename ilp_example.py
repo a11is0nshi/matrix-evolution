@@ -28,7 +28,7 @@ try:
    for v in m.getVars():
       print(v.varName, v.x)
    
-   print('Optimal Objective function value:', m.objVal)
+   print('Optimal Objective function value:', m.ObjVal)
 
 except GurobiError:
     print('Error reported')
