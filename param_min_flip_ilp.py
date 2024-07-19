@@ -28,60 +28,56 @@ def ILPincreased(u, Vset):
         row_index = row_index + 1
 
     try:
-        m1 = Model("min_flip_model1")
-        m2 = Model("min_flip_model2")
+        ma = Model("min_flip_model1")
+        mb = Model("min_flip_model2")
        
         # X is a conflict free matrix by constraints
-        X = m1.addMVar((N, M), vtype=GRB.BINARY, name="X")
-        Y = m2.addMVar((N, M), vtype=GRB.BINARY, name="Y")
+        X = ma.addMVar((N, M), vtype=GRB.BINARY, name="X")
+        Y = mb.addMVar((N, M), vtype=GRB.BINARY, name="Y")
 
         # Objective function - row
-        total = sum(sum((1 - V[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
-        m1.setObjective(total, GRB.MINIMIZE)
+        totala = sum(sum((1 - V[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
+        ma.setObjective(totala, GRB.MINIMIZE)
 
         # Objective function - row prime
-        total2 = sum(sum((1 - V[i, j])*(Y[i, j]) for j in range(M)) for i in range(N))
-        m2.setObjective(total, GRB.MINIMIZE)
+        totalb = sum(sum((1 - V[i, j])*(Y[i, j]) for j in range(M)) for i in range(N))
+        mb.setObjective(totalb, GRB.MINIMIZE)
         
-        B01 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B01")
-        B10 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B10")
-        B11 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B11")
+        B01a = ma.addMVar((M,M), vtype=GRB.BINARY, name="B01a")
+        B10a = ma.addMVar((M,M), vtype=GRB.BINARY, name="B10a")
+        B11a = ma.addMVar((M,M), vtype=GRB.BINARY, name="B11a")
 
-        B012 = m2.addMVar((M,M), vtype=GRB.BINARY, name="B01")
-        B102 = m2.addMVar((M,M), vtype=GRB.BINARY, name="B10")
-        B112 = m2.addMVar((M,M), vtype=GRB.BINARY, name="B11")
+        B01b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B01b")
+        B10b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B10b")
+        B11b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B11b")
 
-        z = m2.addMVar((1, N), vtype =GRB.BINARY, name="z")
-        u = m2.addVar(vtype=GRB.INTEGER, name="u")
-        v = m2.addVar(vtype=GRB.INTEGER, name="v")
-        V = m2.addVar(vtype=GRB.INTEGER, name="V")
+        z = mb.addMVar((1, N), vtype =GRB.BINARY, name="z")
+        u = mb.addVar(vtype=GRB.INTEGER, name="u")
+        v = mb.addVar(vtype=GRB.INTEGER, name="v")
+        V = mb.addVar(vtype=GRB.INTEGER, name="V")
 
         # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
-        m1.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m1.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m1.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m1.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
+        ma.addConstrs(-1 * X[i, p] + X[i, q] <= B01a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        ma.addConstrs(X[i, p] - X[i, q] <= B10a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        ma.addConstrs(X[i, p] + X[i, q] - 1 <= B11a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        ma.addConstrs(B01a[p,q] + B10a[p,q] + B11a[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
 
-        m2.addConstrs(-1 * Y[i, p] + Y[i, q] <= B012[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m2.addConstrs(Y[i, p] - Y[i, q] <= B102[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m2.addConstrs(Y[i, p] + Y[i, q] - 1 <= B112[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m2.addConstrs(B012[p,q] + B102[p,q] + B112[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
+        mb.addConstrs(-1 * Y[i, p] + Y[i, q] <= B01b[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        mb.addConstrs(Y[i, p] - Y[i, q] <= B10b[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        mb.addConstrs(Y[i, p] + Y[i, q] - 1 <= B11b[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
+        mb.addConstrs(B01b[p,q] + B10b[p,q] + B11b[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
     
     # Essential Partial Order Constraints
-        m2.addConstr(z[i] <= (Y[u, i] - Y[v, i] + 1)/2 for i in range(N))
-        m2.addConstr(sum(z[i] for i in range(N)) >= 1)
-        m2.addConstr(0 <= u)
-        m2.addConstr(u < N)
-        m2.addConstr(0 <= v)
-        m2.addConstr(v < N)
-        m2.addConstr(v != u)
-        m2.optimize()
+        mb.addConstr(z[i] <= (Y[u, i] - Y[v, i] + 1)/2 for i in range(N))
+        mb.addConstr(sum(z[i] for i in range(N)) >= 1)
+        mb.addConstr(0 <= u)
+        mb.addConstr(u < N)
+        mb.addConstr(0 <= v)
+        mb.addConstr(v < N)
+        mb.addConstr(v != u)
+        mb.optimize()
         
-        # # Print results
-        # for y in m1.getVars():
-        # print(y.varName, y.x)
-        
-        if m1.objVal < m2.objVal:
+        if ma.objVal < mb.objVal:
             return True
         else: 
             return False
