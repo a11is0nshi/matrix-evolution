@@ -20,7 +20,6 @@ D = getMatrix("Patient2_phyolin.csv")
 def getV(D, u):
     return np.delete(D, u, 0)
 
-
 def ILPincreased(u, V):
 
     VMatrix = np.matrix(len(V), D.shape[1])
@@ -99,6 +98,8 @@ def Split(V):
     i = int(len(V)/2)
     return set(V[:i]), set(V[i:])
 
+# Given a sample index u and set of test sample indices V, GetRelated(u, V) 
+# outputs all samples v ∈ V such that u <e v
 def GetRelated(u, V):
     if ILPincreased(u, V):
         if V.shape[0] == 1:
@@ -107,6 +108,8 @@ def GetRelated(u, V):
             Vl, Vr = Split(V)
             return GetRelated(u, Vl).union(GetRelated(u, Vr))
         
+# Given a matrix D and positive integer k, GetEssential(D, k) outputs the 
+# the <e relation
 def GetEssential(D, k):
     S = {num+1 for num in range(D.shape[0])}
     ess_set = {}
