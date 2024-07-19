@@ -88,12 +88,13 @@ def GetEssential(D, k):
     for u in S:
         V = S.difference({u})
         R.append(GetRelated(u, V))
+        if R[-1] == None:
+            print(f"u: {u}, V: {V}")
         print(F"R : {R}")
         P = {(u, y) for y in R[u-1]}
         temp = ess_set.union(P)
         ess_set = temp
     return ess_set
-
 
 D = getMatrix("small_test.csv")
 k = 10
