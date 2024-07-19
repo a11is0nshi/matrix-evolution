@@ -47,7 +47,7 @@ def ILPincreased(u, Vset):
         B10b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B10b")
         B11b = mb.addMVar((M,M), vtype=GRB.BINARY, name="B11b")
 
-        z = mb.addMVar((1, N), vtype =GRB.BINARY, name="z")
+        z = mb.addMVar(N, vtype =GRB.BINARY, name="z")
         # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
         ma.addConstrs(-1 * X[i, p] + X[i, q] <= B01a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
         ma.addConstrs(X[i, p] - X[i, q] <= B10a[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
@@ -60,10 +60,10 @@ def ILPincreased(u, Vset):
         mb.addConstrs(B01b[p,q] + B10b[p,q] + B11b[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
     
         # Essential Partial Order Constraints
-        mb.addConstr(z[i] <= (Y[u, i] - Y[v-1, i] + 1)/2 for i in range(N) for v in Vset)
+        mb.addConstrs(z[i] <= (Y[u, i] - Y[v-1, i] + 1)/2 for i in range(N) for v in Vset)
         mb.addConstr(sum(z[i] for i in range(N)) >= 1)
-        mb.optimize()
-        
+     
+    
         if ma.objVal < mb.objVal:
             return True
         else: 
