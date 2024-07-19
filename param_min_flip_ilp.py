@@ -9,7 +9,7 @@ from sys import *
 import numpy as np
 import pandas as pd
 
-# Change name var to change file
+# Change name and k to change file
 name = "small_test.csv"
 k = 10
 
