@@ -112,15 +112,15 @@ def GetRelated(u, V):
 def GetEssential(D, k):
     S = {num+1 for num in range(D.shape[0])}
     ess_set = {}
-    R = dict()
+    R = []
     for u in S:
-        R[u] = GetRelated(u, S.difference({u}))
+        R.append(GetRelated(u, S.difference({u})))
         ess_set = ess_set.union({(u, y) for y in R[u]})
     return ess_set
 
 
 D = getMatrix("nameoffile")
 k = 10
-print(GetEssential)
+print(GetEssential(D, k))
 
 
