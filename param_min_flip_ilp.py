@@ -19,32 +19,28 @@ def getV(D, u):
 
 
 def ILPincreased(u, V):
-
     try:
         # D is input binary matrix
-        # D = get_phyolin_matrix("Patient2_phyolin.csv")
-        N = V.shape[0]
-        M = V.shape[1]
+        # D = getMatrix("Patient2_phyolin.csv")
+        N = D.shape[0]      # num of samples - rows
+        M = D.shape[1]      # num of mutations - cols
 
         m1 = Model("min_flip_model1")
         m2 = Model("min_flip_model2")
-
-        
-    # X is a conflict free matrix by constraints
+       
+        # X is a conflict free matrix by constraints
         X = m1.addMVar((N, M), vtype=GRB.BINARY, name="X")
         Y = m2.addMVar((N, M), vtype=GRB.BINARY, name="Y")
 
-
-
-
-        # Objective function
-        total = sum(sum(V[i, j]*(1 - X[i, j]) + (1 - V[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
+        # Objective function - row
+        total = sum(sum((1 - V[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
         m1.setObjective(total, GRB.MINIMIZE)
 
-        total2 = sum(sum(V[i, j]*(1 - Y[i, j]) + (1 - V[i, j])*(Y[i, j]) for j in range(M)) for i in range(N))
+        # Objective function - row prime
+        total2 = sum(sum((1 - V[i, j])*(Y[i, j]) for j in range(M)) for i in range(N))
         m2.setObjective(total, GRB.MINIMIZE)
         
-        B01 = m1.addMVar((M, M), vtype=GRB.BINARY, name="B01")
+        B01 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B01")
         B10 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B10")
         B11 = m1.addMVar((M,M), vtype=GRB.BINARY, name="B11")
 
@@ -92,22 +88,17 @@ def ILPincreased(u, V):
         print(ex)
 
 def Split(V):
-    center = V.shape[0] // 2
-    Vl = np.zeros(len(center), V.shape[1])
-    Vr = np.zeros(V.shape[0]-len(center), V.shape[1])
-    for i in range(center):
-        Vl.append(V[i])
-    for j in range(V.shape[0]-len(center)):
-        Vr.append(V[j])
-    return V, V
+    V = list(V)
+    i = int(len(V)/2)
+    return set(V[:i]), set(V[i:])
 
 def GetRelated(u, V):
-    if ILPincreased:
+    if ILPincreased(u, V):
         if V.shape[0] == 1:
             return V
         else:
-            (Vl, Vr) = Split(V)
-            return np.concatenate(GetRelated(u, Vl), GetRelated(u, Vr))
+            Vl, Vr = Split(V)
+            return GetRelated(u, Vl).union(GetRelated(u, Vr))
         
 def GetEssential(D, k):
     S = {num+1 for num in range(D.shape[0])}
