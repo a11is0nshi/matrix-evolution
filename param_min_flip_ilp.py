@@ -9,6 +9,9 @@ from sys import *
 import numpy as np
 import pandas as pd
 
+
+
+
 # Change name and k to change file
 name = "small_test.csv"
 k = 10
@@ -26,6 +29,7 @@ def ILP(u, Vset, prime):
 
     try:
         m = Model("min_flip_model")
+        m.Params.LogToConsole = 0
     
         # X is a conflict free matrix by constraints
         X = m.addMVar((N, M), vtype=GRB.BINARY, name="X")
@@ -86,7 +90,6 @@ def GetRelated(u, V):
 # the <e relation
 def GetEssential(D, k):
     S = {num+1 for num in range(D.shape[0])}
-    print(f"S : {S}")
     ess_set = set()
     R = []
     for u in S:
