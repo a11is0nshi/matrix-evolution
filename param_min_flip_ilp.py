@@ -24,9 +24,10 @@ def ILPincreased(u, Vset):
     M = D.shape[1]  # num of mutations - cols
 
     # Populate VMatrix - extracts certain rows of D matrix
+   
     V = np.zeros((N, M), dtype=int)
     row_index = 0
-    for i in V:
+    for i in Vset:
         V[row_index] = D[i-1]
         row_index = row_index + 1
 
