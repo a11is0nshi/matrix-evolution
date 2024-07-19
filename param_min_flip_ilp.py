@@ -21,16 +21,17 @@ def getV(D, u):
     return np.delete(D, u, 0)
 
 def ILPincreased(u, V):
+    N = len(V)      # num of samples - rows
+    M = D.shape[1]  # num of mutations - cols
 
-    VMatrix = np.matrix(len(V), D.shape[1])
-    row = 0
+    # Populate VMatrix - extracts certain rows of D matrix
+    VMatrix = np.zeros((N, M), dtype=int)
+    row_index = 0
     for i in V:
-        VMatrix[row] = D[i]
-        row = row + 1
-    try:
-        N = VMatrix.shape[0]      # num of samples - rows
-        M = VMatrix.shape[1]      # num of mutations - cols
+        VMatrix[row_index] = D[i]
+        row_index = row_index + 1
 
+    try:
         m1 = Model("min_flip_model1")
         m2 = Model("min_flip_model2")
        
