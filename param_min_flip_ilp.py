@@ -13,6 +13,9 @@ def getMatrix(name):
     df = pd.read_csv(name)
     return df.to_numpy()
 
+# D is input binary matrix
+D = getMatrix("Patient2_phyolin.csv")
+
 # given a Matrix M and an index u, getV(M, u) returns V = M \ M[u]
 def getV(D, u):
     return np.delete(D, u, 0)
@@ -20,8 +23,6 @@ def getV(D, u):
 
 def ILPincreased(u, V):
     try:
-        # D is input binary matrix
-        # D = getMatrix("Patient2_phyolin.csv")
         N = D.shape[0]      # num of samples - rows
         M = D.shape[1]      # num of mutations - cols
 
