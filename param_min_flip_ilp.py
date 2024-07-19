@@ -9,12 +9,15 @@ from sys import *
 import numpy as np
 import pandas as pd
 
+# Change name var to change file
+name = "Patient2_phyolin.csv"
+
 def getMatrix(name):
     df = pd.read_csv(name)
     return df.to_numpy()
 
 # D is input binary matrix
-D = getMatrix("Patient2_phyolin.csv")
+D = getMatrix(name)
 
 def ILPincreased(u, Vset):
     N = len(Vset)      # num of samples - rows
