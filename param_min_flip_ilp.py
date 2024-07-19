@@ -20,17 +20,8 @@ def getMatrix(name):
 D = getMatrix(name)
 
 def ILPincreased(u, Vset):
-    N = len(Vset)   
-    # num of samples - rows
+    N = D.shape[0]  # num of samples - rows
     M = D.shape[1]  # num of mutations - cols
-
-    # Populate VMatrix - extracts certain rows of D matrix
-
-    V = np.zeros((N, M), dtype=int)
-    row_index = 0
-    for i in Vset:
-        V[row_index] = D[i-1]
-        row_index = row_index + 1
 
     try:
         ma = Model("min_flip_model1")
@@ -41,11 +32,11 @@ def ILPincreased(u, Vset):
         Y = mb.addMVar((N, M), vtype=GRB.BINARY, name="Y")
 
         # Objective function - row
-        totala = sum(sum((1 - V[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
+        totala = sum(sum((1 - D[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
         ma.setObjective(totala, GRB.MINIMIZE)
 
         # Objective function - row prime
-        totalb = sum(sum((1 - V[i, j])*(Y[i, j]) for j in range(M)) for i in range(N))
+        totalb = sum(sum((1 - D[i, j])*(Y[i, j]) for j in range(M)) for i in range(N))
         mb.setObjective(totalb, GRB.MINIMIZE)
         
         B01a = ma.addMVar((M,M), vtype=GRB.BINARY, name="B01a")
@@ -69,7 +60,7 @@ def ILPincreased(u, Vset):
         mb.addConstrs(B01b[p,q] + B10b[p,q] + B11b[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
     
         # Essential Partial Order Constraints
-        mb.addConstr(z[i] <= (Y[u, i] - Y[v, i] + 1)/2 for i in range(N) for v in range(N))
+        mb.addConstr(z[i] <= (Y[u, i] - Y[v-1, i] + 1)/2 for i in range(N) for v in Vset)
         mb.addConstr(sum(z[i] for i in range(N)) >= 1)
         mb.optimize()
         
