@@ -28,7 +28,10 @@ def ILP(u, Vset, prime):
     M = D.shape[1]  # num of mutations - cols
 
     try:
-        m = Model("min_flip_model")
+        env = Env(empty=True)
+        env.setParam("OutputFlag",0)
+        env.start()
+        m = Model("min_flip_model", env = env)
         m.Params.LogToConsole = 0
     
         # X is a conflict free matrix by constraints
@@ -53,7 +56,6 @@ def ILP(u, Vset, prime):
         # Essential Partial Order Constraints
         if prime:
             z = m.addMVar((N,), vtype =GRB.BINARY, name="z")
-            print(z)
             m.addConstrs(z[i] <= (X[u-1, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
             m.addConstr(sum(z[i] for i in range(N)) >= 1)
 
