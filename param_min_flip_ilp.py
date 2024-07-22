@@ -51,41 +51,36 @@ def ILP(u, Vset, prime):
         m.addConstrs(sum(D[i, j] * (1 - X[i, j])) <= k for i in range(N) for j in range(M))
         m.update()
         m.optimize()
-        print(f"Obj val: {m.ObjVal}")
 
         # Essential Partial Order Constraints
         if prime:
             z = m.addMVar((M,Nv), vtype=GRB.BINARY, name="z")
             m.update()
-            print(f"num constrs: {m.NumConstrs}")
-            print(f"num vars: {m.NumBinVars}")
-            
             for i in range(M):
                 for v in range(Nv):
-                    print(f"i: {i}, v: {v}, u: {u}")
                     m.addConstr(z[i, v] <= (X[u-1, i] - X[list(Vset)[v]-1, i] + 1)/2)
             
             m.addConstr(sum(z[i, v] for i in range(M) for v in range(Nv)) <= 1)
+            print(f"prime: {m.NumConstrs} constrs and {m.NumBinVars} vars")
 
-        m.update()
-        print(f"num constrs: {m.NumConstrs}")
-        print(f"num vars: {m.NumBinVars}")
+        else:
+            print(f"initial: {m.NumConstrs} constrs and {m.NumBinVars} vars")
+
         m.optimize()
         m.write('model.mps')
         toReturn = m.ObjVal
         m.reset()
-        return toReturn, 1
+        return toReturn
 
     except GurobiError as ex:
         print('*********ERROR*********')
-        print(ex)
+        print(f"error: {ex}")
 
 def ILPincreased(u, Vset):
-    sig1, var1 = ILP(u, Vset, False)
-    print(var1)
-    sig2, var2 = ILP(u, Vset, True)
-    print(f"u: {u}, Vset: {Vset}")
-    print(f"    sig1: {sig1}, sig2: {sig2}")
+    sig1 = ILP(u, Vset, False)
+    sig2 = ILP(u, Vset, True)
+    print(f"u: {u}, V: {Vset}")
+    print(f"    sig1: {sig1}, sig2: {sig2} \n")
     return sig1 < sig2
 
 def Split(V):
@@ -113,9 +108,7 @@ def GetEssential(D, k):
     R = []
     for u in S:
         V = S.difference({u})
-        # print(f"GetRelated({u},{V}: {GetRelated(u, V)})")
         R.append(GetRelated(u, V))
-        # print(F"R : {R}")
         P = {(u, y) for y in R[u-1]}
         temp = ess_set.union(P)
         ess_set = temp
@@ -124,6 +117,6 @@ def GetEssential(D, k):
 
 D = getMatrix(name)
 
-print(f"GetEssential: {GetEssential(D, k)}")
+print(f"R: {GetEssential(D, k)}")
 
 
