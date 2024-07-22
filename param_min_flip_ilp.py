@@ -62,7 +62,7 @@ def ILP(u, Vset, prime):
         m.update()
         m.optimize()
         m.write('model.mps')
-        toReturn = m.objVal
+        toReturn = m.ObjVal
         m.reset()
         return toReturn
 
