@@ -81,12 +81,12 @@ def ILP(u, Vset, prime):
         print(ex)
 
 def ILPincreased(u, Vset):
-    r1, var1 = ILP(u, Vset, False)
+    sig1, var1 = ILP(u, Vset, False)
     print(var1)
-    r2, var2 = ILP(u, Vset, True)
+    sig2, var2 = ILP(u, Vset, True)
     print(f"u: {u}, Vset: {Vset}")
-    print(f"    sig1: {r1}, sig2: {r2}")
-    return r1 < r2
+    print(f"    sig1: {sig1}, sig2: {sig2}")
+    return sig1 < sig2
 
 def Split(V):
     V = list(V)
