@@ -40,6 +40,8 @@ def ILP(u, Vset, prime):
         m.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
         m.addConstrs(X[i, p] + X[i, q] <= B11[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
         m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(p+1, M))
+
+        # Ensure that there are at most k 1->0 flips
         m.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(N) for j in range(M)) <= k)
         m.update()
         m.optimize()
