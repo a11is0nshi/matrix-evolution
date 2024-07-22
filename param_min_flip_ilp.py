@@ -56,6 +56,7 @@ def ILP(u, Vset, prime):
             m.addConstrs(sum(z[i, v-1]) >= 1 for i in range(N) for v in Vset)
 
         m.optimize()
+        m.write('model.mps')
         toReturn = m.objVal
         m.reset()
         return toReturn
