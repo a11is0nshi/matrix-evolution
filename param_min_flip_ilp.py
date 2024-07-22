@@ -65,7 +65,7 @@ def ILP(u, Vset, prime):
                     print(f"i: {i}, v: {v}, u: {u}")
                     m.addConstr(z[i, v] <= (X[u-1, i] - X[list(Vset)[v]-1, i] + 1)/2)
             
-            m.addConstrs(sum(z[i, v]) <= 1 for i in range(M) for v in range(Nv))
+            m.addConstr(sum(z[i, v] for i in range(M) for v in range(Nv)) <= 1)
 
         m.update()
         print(f"num constrs: {m.NumConstrs}")
