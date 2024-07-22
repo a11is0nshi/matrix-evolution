@@ -49,12 +49,17 @@ def ILP(u, Vset, prime):
         m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(p+1, M))
         m.addConstrs(sum(D[i, j] * (1 - X[i, j])) <= k for i in range(N) for j in range(M))
 
+        m.update()
+        m.optimize()
+        print(f"obj val: {m.objVal}")
+
         # Essential Partial Order Constraints
         if prime:
             z = m.addMVar((N,N), vtype=GRB.BINARY, name="z")
             m.addConstrs(z[i, v-1] <= (X[u-1, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
             m.addConstrs(sum(z[i, v-1]) >= 1 for i in range(N) for v in Vset)
 
+        m.update()
         m.optimize()
         m.write('model.mps')
         toReturn = m.objVal
@@ -107,6 +112,7 @@ def GetEssential(D, k):
 
 
 D = getMatrix(name)
+
 print(f"GetEssential: {GetEssential(D, k)}")
 
 
