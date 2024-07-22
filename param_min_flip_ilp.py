@@ -115,8 +115,6 @@ def GetEssential(D, k):
     return ess_set
 
 
-D = getMatrix(name)
-
 print(f"R: {GetEssential(D, k)}")
 
 
