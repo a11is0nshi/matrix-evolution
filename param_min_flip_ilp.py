@@ -51,7 +51,7 @@ def ILP(u, Vset, prime):
 
         m.update()
         m.optimize()
-        print(f"obj val: {m.objVal}")
+        print(f"Obj val: {m.ObjVal}")
 
         # Essential Partial Order Constraints
         if prime:
