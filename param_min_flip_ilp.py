@@ -10,7 +10,7 @@ import pandas as pd
 
 # Change name and k to change file
 name = "small_test.csv"
-k = 10
+k = 2
 
 D =  pd.read_csv(name).to_numpy()
 
@@ -20,12 +20,11 @@ def ILP(u, Vset, prime):
     Nv = len(Vset)
 
     try:
-        # Silence console outputs
-        env = Env(empty=True)
-        env.setParam("OutputFlag",0)
+        env = Env(empty=True) # when set to True, silences console outputs
+        env.setParam("OutputFlag",0) # when set to 0, silences console outputs
         env.start()
         m = Model("min_flip_model", env = env)
-        m.Params.LogToConsole = 0
+        m.Params.LogToConsole = 0 # when set to 0, silences console outputs
     
         X = m.addMVar((N, M), vtype=GRB.BINARY, name="X") # Conflict free matrix
         B01 = m.addMVar((M, M), vtype=GRB.BINARY, name="B01")
