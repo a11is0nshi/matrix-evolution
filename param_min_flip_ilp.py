@@ -12,12 +12,7 @@ import pandas as pd
 name = "small_test.csv"
 k = 10
 
-def getMatrix(name):
-    df = pd.read_csv(name)
-    return df.to_numpy()
-
-# D is input binary matrix
-D = getMatrix(name)
+D =  pd.read_csv(name).to_numpy()
 
 def ILP(u, Vset, prime):
     N = D.shape[0]  # num of samples - rows
