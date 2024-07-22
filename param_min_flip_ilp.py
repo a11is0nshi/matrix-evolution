@@ -22,6 +22,7 @@ D = getMatrix(name)
 def ILP(u, Vset, prime):
     N = D.shape[0]  # num of samples - rows
     M = D.shape[1]  # num of mutations - cols
+    Nv = len(Vset)
 
     try:
         env = Env(empty=True)
@@ -48,33 +49,43 @@ def ILP(u, Vset, prime):
         m.addConstrs(X[i, p] + X[i, q] <= B11[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
         m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(p+1, M))
         m.addConstrs(sum(D[i, j] * (1 - X[i, j])) <= k for i in range(N) for j in range(M))
-
         m.update()
         m.optimize()
         print(f"Obj val: {m.ObjVal}")
 
         # Essential Partial Order Constraints
         if prime:
-            z = m.addMVar((N,N), vtype=GRB.BINARY, name="z")
-            m.addConstrs(z[i, v-1] <= (X[u-1, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
-            m.addConstrs(sum(z[i, v-1]) >= 1 for i in range(N) for v in Vset)
+            z = m.addMVar((M,Nv), vtype=GRB.BINARY, name="z")
+            m.update()
+            print(f"num constrs: {m.NumConstrs}")
+            print(f"num vars: {m.NumBinVars}")
+            
+            for i in range(M):
+                for v in range(Nv):
+                    print(f"i: {i}, v: {v}, u: {u}")
+                    m.addConstr(z[i, v] <= (X[u-1, i] - X[list(Vset)[v]-1, i] + 1)/2)
+            
+            m.addConstrs(sum(z[i, v]) <= 1 for i in range(M) for v in range(Nv))
 
         m.update()
+        print(f"num constrs: {m.NumConstrs}")
+        print(f"num vars: {m.NumBinVars}")
         m.optimize()
         m.write('model.mps')
         toReturn = m.ObjVal
         m.reset()
-        return toReturn
+        return toReturn, 1
 
     except GurobiError as ex:
         print('*********ERROR*********')
         print(ex)
 
 def ILPincreased(u, Vset):
-    r1 = ILP(u, Vset, False)
-    r2 = ILP(u, Vset, True)
+    r1, var1 = ILP(u, Vset, False)
+    print(var1)
+    r2, var2 = ILP(u, Vset, True)
     print(f"u: {u}, Vset: {Vset}")
-    print(f"    r1: {r1}, r2: {r2}")
+    print(f"    sig1: {r1}, sig2: {r2}")
     return r1 < r2
 
 def Split(V):
