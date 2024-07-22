@@ -2,7 +2,6 @@
 ILP Implementation inspired by (Malikic et. al, 867-868) paper. 
 This implementation sets D to be a random binary m x n matrix, where there are 
 m sequenced single cells and n mutations
-
 """
 from gurobipy import *
 from sys import * 
@@ -52,12 +51,14 @@ def ILP(u, Vset, prime):
 
         # Essential Partial Order Constraints
         if prime:
-            z = m.addMVar((N,), vtype=GRB.BINARY, name="z")
-            m.addConstrs(z[i] <= (X[u-1, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
-            m.addConstr(sum(z[i] for i in range(N)) >= 1)
+            z = m.addMVar((N,N), vtype=GRB.BINARY, name="z")
+            m.addConstrs(z[i, v-1] <= (X[u-1, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
+            m.addConstrs(sum(z[i, v-1]) >= 1 for i in range(N) for v in Vset)
 
         m.optimize()
-        return m.ObjVal
+        toReturn = m.objVal
+        m.reset()
+        return toReturn
 
     except GurobiError as ex:
         print('*********ERROR*********')
