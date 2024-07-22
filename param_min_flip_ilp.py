@@ -9,9 +9,6 @@ from sys import *
 import numpy as np
 import pandas as pd
 
-
-
-
 # Change name and k to change file
 name = "small_test.csv"
 k = 10
@@ -42,20 +39,20 @@ def ILP(u, Vset, prime):
         m.setObjective(total, GRB.MINIMIZE)
         
         # Add auxillary constraints
-        B01 = m.addMVar((M,M), vtype=GRB.BINARY, name="B01")
-        B10 = m.addMVar((M,M), vtype=GRB.BINARY, name="B10")
-        B11 = m.addMVar((M,M), vtype=GRB.BINARY, name="B11")
+        B01 = m.addMVar((M, M), vtype=GRB.BINARY, name="B01")
+        B10 = m.addMVar((M, M), vtype=GRB.BINARY, name="B10")
+        B11 = m.addMVar((M, M), vtype=GRB.BINARY, name="B11")
 
         # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
-        m.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(M) for q in range(M) for i in range(N) if p != q)
-        m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(M) if p != q)
-        m.addConstrs(sum(D[i, j] * (1-X[i, j])) <= k for i in range(N) for j in range(M))
+        m.addConstrs(X[i, q] - X[i, p] <= B01[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
+        m.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
+        m.addConstrs(X[i, p] + X[i, q] <= B11[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
+        m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(p+1, M))
+        m.addConstrs(sum(D[i, j] * (1 - X[i, j])) <= k for i in range(N) for j in range(M))
 
         # Essential Partial Order Constraints
         if prime:
-            z = m.addMVar((N,), vtype =GRB.BINARY, name="z")
+            z = m.addMVar((N,), vtype=GRB.BINARY, name="z")
             m.addConstrs(z[i] <= (X[u-1, i] - X[v-1, i] + 1)/2 for i in range(N) for v in Vset)
             m.addConstr(sum(z[i] for i in range(N)) >= 1)
 
@@ -69,6 +66,8 @@ def ILP(u, Vset, prime):
 def ILPincreased(u, Vset):
     r1 = ILP(u, Vset, False)
     r2 = ILP(u, Vset, True)
+    print(f"u: {u}, Vset: {Vset}")
+    print(f"    r1: {r1}, r2: {r2}")
     return r1 < r2
 
 def Split(V):
@@ -96,9 +95,9 @@ def GetEssential(D, k):
     R = []
     for u in S:
         V = S.difference({u})
-        print(f"GetRelated({u},{V}: {GetRelated(u, V)})")
+        # print(f"GetRelated({u},{V}: {GetRelated(u, V)})")
         R.append(GetRelated(u, V))
-        print(F"R : {R}")
+        # print(F"R : {R}")
         P = {(u, y) for y in R[u-1]}
         temp = ess_set.union(P)
         ess_set = temp
