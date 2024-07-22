@@ -20,6 +20,7 @@ def ILP(u, Vset, prime):
     Nv = len(Vset)
 
     try:
+        # silence console outputs
         env = Env(empty=True)
         env.setParam("OutputFlag",0)
         env.start()
