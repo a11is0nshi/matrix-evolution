@@ -15,31 +15,28 @@ k = 10
 D =  pd.read_csv(name).to_numpy()
 
 def ILP(u, Vset, prime):
-    N = D.shape[0]  # num of samples - rows
-    M = D.shape[1]  # num of mutations - cols
+    N = D.shape[0]  # samples/rows
+    M = D.shape[1]  # mutations/cols
     Nv = len(Vset)
 
     try:
-        # silence console outputs
+        # Silence console outputs
         env = Env(empty=True)
         env.setParam("OutputFlag",0)
         env.start()
         m = Model("min_flip_model", env = env)
         m.Params.LogToConsole = 0
     
-        # X is a conflict free matrix by constraints
-        X = m.addMVar((N, M), vtype=GRB.BINARY, name="X")
-
-        # Objective function
-        total = sum(sum((1 - D[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
-        m.setObjective(total, GRB.MINIMIZE)
-        
-        # Add auxillary constraints
+        X = m.addMVar((N, M), vtype=GRB.BINARY, name="X") # Conflict free matrix
         B01 = m.addMVar((M, M), vtype=GRB.BINARY, name="B01")
         B10 = m.addMVar((M, M), vtype=GRB.BINARY, name="B10")
         B11 = m.addMVar((M, M), vtype=GRB.BINARY, name="B11")
 
-        # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
+        # Objective function
+        total = sum(sum((1 - D[i, j])*(X[i, j]) for j in range(M)) for i in range(N))
+        m.setObjective(total, GRB.MINIMIZE)
+
+        # Ensure no conflicts by checking each pair of columns (p, q)) 
         m.addConstrs(X[i, q] - X[i, p] <= B01[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
         m.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
         m.addConstrs(X[i, p] + X[i, q] <= B11[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
@@ -96,8 +93,7 @@ def GetRelated(u, V):
     else: 
         return {}
         
-# Given a matrix D and positive integer k, GetEssential(D, k) outputs the 
-# the <e relation
+# Given a matrix D and positive integer k, GetEssential(D, k) outputs <e
 def GetEssential(D, k):
     S = {num+1 for num in range(D.shape[0])}
     ess_set = set()
