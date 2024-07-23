@@ -13,7 +13,7 @@ import pandas as pd
 
 # Change name and k to change file
 name = "smallest_test.csv"
-k = 0
+k = 1
 
 D =  pd.read_csv(name).to_numpy()
 
@@ -57,10 +57,10 @@ def ILP(u, Vset, prime):
                     m.addConstr(z[i, v] <= (X[u, i] - X[list(Vset)[v], i] + 1)/2)
             
             m.addConstr(sum(z[i, v] for i in range(M) for v in range(Nv)) >= 1)
-            print(f"prime: {m.NumConstrs} constrs and {m.NumBinVars} vars")
+           # print(f"prime: {m.NumConstrs} constrs and {m.NumBinVars} vars")
 
-        else:
-            print(f"initial: {m.NumConstrs} constrs and {m.NumBinVars} vars")
+        # else:
+        #     print(f"initial: {m.NumConstrs} constrs and {m.NumBinVars} vars")
 
         m.optimize()
         m.write('model.mps')
