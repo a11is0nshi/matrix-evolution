@@ -10,7 +10,7 @@ import process_data as p
 import pandas as pd
 
 # Change name and k to change file
-name = "small_test.csv"
+name = "smallest_test.csv"
 
 D =  pd.read_csv(name).to_numpy()
 
@@ -27,7 +27,7 @@ try:
     total = sum(sum((1 - D[i, j])*(X[i, j]) for j in range(n)) for i in range(m))
     model.setObjective(total, GRB.MINIMIZE)
 
-    k = 1
+    k = 0
     model.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(m) for j in range(n)) <= k)
     
     B01 = model.addMVar((n,n), vtype=GRB.BINARY, name="B01")
