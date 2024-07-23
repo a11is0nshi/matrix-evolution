@@ -2,6 +2,9 @@
 ILP Implementation inspired by (Malikic et. al, 867-868) paper. 
 This implementation sets D to be a random binary m x n matrix, where there are 
 m sequenced single cells and n mutations
+
+sig1 is the minimum number of 0 to 1 flips necessary to make D a 
+conflict free matrix while allowing for k 1 to 0 flips. 
 """
 from gurobipy import *
 from sys import * 
@@ -9,8 +12,8 @@ import numpy as np
 import pandas as pd
 
 # Change name and k to change file
-name = "small_test.csv"
-k = 2
+name = "smallest_test.csv"
+k = 0
 
 D =  pd.read_csv(name).to_numpy()
 
@@ -37,7 +40,7 @@ def ILP(u, Vset, prime):
         # Enforce no conflicts by checking each pair of columns (p, q)) 
         m.addConstrs(X[i, q] - X[i, p] <= B01[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
         m.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
-        m.addConstrs(X[i, p] + X[i, q] <= B11[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
+        m.addConstrs(X[i, p] + X[i, q] -1  <= B11[p,q] for p in range(M) for q in range(p+1, M) for i in range(N))
         m.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(M) for q in range(p+1, M))
 
         # Ensure that there are at most k 1->0 flips
@@ -98,12 +101,14 @@ def GetEssential(D, k):
     S = {num for num in range(D.shape[0])}
     ess_set = set()
     R = []
-    for u in S:
-        V = S.difference({u})
-        R.append(GetRelated(u, V))
-        P = {(u, y) for y in R[u]}
-        temp = ess_set.union(P)
-        ess_set = temp
-    return ess_set
-
+    # for u in S:
+    #     V = S.difference({u})
+    #     R.append(GetRelated(u, V))
+    #     P = {(u, y) for y in R[u]}
+    #     temp = ess_set.union(P)
+    #     ess_set = temp
+    # return ess_set
+    R.append(GetRelated(0, {1}))
+    P = {(0, y) for y in R[0]}  
+    return P
 print(f"R: {GetEssential(D, k)}")
