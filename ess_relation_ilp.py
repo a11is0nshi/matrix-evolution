@@ -13,7 +13,7 @@ import pandas as pd
 
 # Change name and k to change file
 name = "smallest_test.csv"
-k = 1
+k = 0
 
 D =  pd.read_csv(name).to_numpy()
 n = D.shape[0]  # samples/rows
@@ -65,13 +65,11 @@ def calcSigma(u, Vset, prime):
         else:
             return sigma
 
-    
-
     except GurobiError as ex:
         print('*********ERROR*********')
         print(f"error: {ex}")
 
-print(calcSigma(0, {1, 2}, False))
+print(calcSigma(0, {1, 2}, True))
 
 """
 
