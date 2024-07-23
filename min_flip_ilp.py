@@ -43,19 +43,19 @@ try:
     model.optimize()
     print(f"sigma: {model.ObjVal}")
     
-    f = open("Patient_6_Results.txt", "w")
-    # Print results
-    f.write("D")
-    D_str = np.array2string(D, threshold = np.inf)
-    f.write(f"\n{D_str} \n \n")
-    f.write("X")
+    # f = open("Patient_6_Results.txt", "w")
+    # # Print results
+    # f.write("D")
+    # D_str = np.array2string(D, threshold = np.inf)
+    # f.write(f"\n{D_str} \n \n")
+    # f.write("X")
     # values = model.getAttr("X", model.getVars())
     # values = np.array(values).reshape((m, n))
-    X_str = np.array2string(X.X, threshold = np.inf)
-    f.write(f"\n{X_str} \n \n")
-    f.write("Optimal Objective function value: \n")
-    f.write(str(model.objVal))
-    f.close()
+    # X_str = np.array2string(X.X, threshold = np.inf)
+    # f.write(f"\n{X_str} \n \n")
+    # f.write("Optimal Objective function value: \n")
+    # f.write(str(model.objVal))
+    # f.close()
 
 
 except GurobiError as ex:
