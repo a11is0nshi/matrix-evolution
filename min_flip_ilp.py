@@ -9,12 +9,13 @@ import numpy as np
 import process_data as p
 import pandas as pd
 
-def get_phyolin_matrix(name):
-    df = pd.read_csv(name)
-    return df.to_numpy()
+# Change name and k to change file
+name = "small_test.csv"
+
+D =  pd.read_csv(name).to_numpy()
+
 try:
     # D is input binary matrix
-    D = get_phyolin_matrix("Patient6_phyolin.csv")
     m, n = D.shape[0], D.shape[1]
 
     model = Model("min_flip_model")
@@ -23,8 +24,11 @@ try:
     X = model.addMVar((m,n), vtype=GRB.BINARY, name="X")
 
     # Objective function
-    total = sum(sum(D[i, j]*(1 - X[i, j]) + (1 - D[i, j])*(X[i, j]) for j in range(n)) for i in range(m))
+    total = sum(sum((1 - D[i, j])*(X[i, j]) for j in range(n)) for i in range(m))
     model.setObjective(total, GRB.MINIMIZE)
+
+    k = 0
+    model.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(m) for j in range(n)) <= k)
     
     B01 = model.addMVar((n,n), vtype=GRB.BINARY, name="B01")
     B10 = model.addMVar((n,n), vtype=GRB.BINARY, name="B10")
@@ -37,6 +41,7 @@ try:
     model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(n) for q in range(n) if p != q)
     
     model.optimize()
+    print(f"sigma: {model.ObjVal}")
     
     f = open("Patient_6_Results.txt", "w")
     # Print results

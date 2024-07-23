@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 # Change name and k to change file
-name = "smallest_test.csv"
+name = "small_test.csv"
 k = 2
 
 D =  pd.read_csv(name).to_numpy()
