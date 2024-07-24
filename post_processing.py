@@ -1,9 +1,23 @@
 # Given R, this will return <e
 from networkx import *
 
-R = {(0,1),(0,1),(1,1),(0,2),(1,3),(1,4),(2,5),(2,6)}
+R = { }
 Rlist = list(R)
 G = DiGraph(Rlist)
-G.remove_edges_from(selfloop_edges(G)) # ex. (1,1)
-TR = transitive_reduction(G) # ex. (0,1), (1,2), (0,2)
-print(list(TR.edges))
+
+# ex. (1,1)
+G.remove_edges_from(selfloop_edges(G)) 
+
+# ex. (1,0), (0,1)
+remove = []
+for scc in strongly_connected_components(G):
+    if len(scc) ==  2:
+      remove.append(list(scc)[0])
+
+for n in remove:
+   G.remove_node(n)
+
+ # ex. (0,1), (1,2), (0,2)  
+G = transitive_reduction(G)
+
+print(G.edges)
