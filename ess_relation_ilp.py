@@ -21,8 +21,11 @@ m = D.shape[1]  # mutations/cols
 
 def GetSigma():
     try:
-
-        model = Model("min_flip_model")
+        env = Env(empty=True) # when set to True, silences console outputs
+        env.setParam("OutputFlag",0) # when set to 0, silences console outputs
+        env.start()
+        model = Model("min_flip_model", env = env)
+        model.Params.LogToConsole = 0 # when set to 0, silences console outputs
 
         # X is a conflict free matrix by constraints
         X = model.addMVar((n,m), vtype=GRB.BINARY, name="X")
