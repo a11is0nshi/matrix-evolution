@@ -13,7 +13,7 @@ import pandas as pd
 import csv
 # Change name and k to change file
 name = "smallest_test.csv"
-k = 1
+k = 0
 
 # Removes duplicate rows 
 df = pd.read_csv(name)
@@ -132,7 +132,7 @@ def GetRelated(u, V, sig):
             Vl, Vr = Split(V)
             return GetRelated(u, Vl, sig).union(GetRelated(u, Vr, sig))
     else: 
-        return {}
+        return set()
         
 # Given a matrix D and positive integer k, GetEssential(D, k) outputs <e
 def GetEssential():
