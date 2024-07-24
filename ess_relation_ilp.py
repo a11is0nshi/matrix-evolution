@@ -2,8 +2,6 @@
 ILP Implementation inspired by (Malikic et. al, 867-868) paper. 
 This implementation sets D to be a random binary m x n matrix, where there are 
 m sequenced single cells and n mutations
-
-
 """
 from gurobipy import *
 from sys import * 
@@ -105,10 +103,13 @@ def TestILP(u, Vset, sig):
         model.optimize()
 
         if model.Status == 3:
-            #print(f"u: {u}, V: {Vset}, sig: {sig} False")
+            print(f"u: {u}, V: {Vset}, sig: {sig} False")
             return False # u <e v
         else:
-            #print(f"u: {u}, V: {Vset}, sig: {sig} True")
+            print(f"u: {u}, V: {Vset}, sig: {sig} True")
+            for var in model.getVars():
+                if (var.VarName)[0] == "X":
+                    print(f"{var.VarName} = {var.x}")
             return True
  
     except GurobiError as ex:
@@ -150,3 +151,4 @@ def GetEssential():
 
 
 print(f"R: {GetEssential()}")
+
