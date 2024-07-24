@@ -19,9 +19,9 @@ for scc in strongly_connected_components(G):
 
 # remove nodes from the strongly connected components
 G.remove_nodes_from(remove)
-print(G.nodes)
+print(f"nodes: {G.nodes}")
 
  # ex. (0,1), (1,2), (0,2)  
 G = transitive_reduction(G)
 
-print(G.edges)
+print(f"edges: {G.edges}")
