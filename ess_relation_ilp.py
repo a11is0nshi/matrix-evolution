@@ -37,10 +37,10 @@ def GetSigma():
         B11 = model.addMVar((m,m), vtype=GRB.BINARY, name="B11")
 
         # Constraints (ensures no conflicts by checking each pair of columns (p, q)) 
-        model.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(m) for q in range(m) for i in range(n) if p != q)
-        model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(m) for i in range(n) if p != q)
-        model.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(m) for q in range(m) for i in range(n) if p != q)
-        model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(m) if p != q)
+        model.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))
+        model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))
+        model.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))
+        model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))
         
         model.optimize()
         sig = model.ObjVal
