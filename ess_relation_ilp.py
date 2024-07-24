@@ -10,7 +10,7 @@ import pandas as pd
 import csv
 # Change name and k to change file
 name = "smallest_test.csv"
-k = 0
+k = 1
 
 # Removes duplicate rows 
 df = pd.read_csv(name)
