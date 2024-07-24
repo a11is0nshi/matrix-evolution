@@ -10,12 +10,17 @@ from gurobipy import *
 from sys import * 
 import numpy as np
 import pandas as pd
-
+import csv
 # Change name and k to change file
 name = "smallest_test.csv"
 k = 1
 
-D =  pd.read_csv(name).to_numpy()
+# Removes duplicate rows 
+df = pd.read_csv(name)
+df.drop_duplicates(inplace=True)
+D = df.to_numpy()
+print(str(D))
+
 n = D.shape[0]  # samples/rows
 m = D.shape[1]  # mutations/cols
 
