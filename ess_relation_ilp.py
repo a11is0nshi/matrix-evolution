@@ -11,6 +11,7 @@ import csv
 # Change name and k to change file
 name = "smallest_test.csv"
 k = 0 
+calls = 0
 
 # Removes duplicate rows 
 df = pd.read_csv(name)
@@ -22,6 +23,7 @@ n = D.shape[0]  # samples/rows
 m = D.shape[1]  # mutations/cols
 
 def GetSigma():
+    calls = calls + 1
     try:
         env = Env(empty=True) # when set to True, silences console outputs
         env.setParam("OutputFlag",0) # when set to 0, silences console outputs
@@ -59,6 +61,7 @@ def GetSigma():
 
 # Returns True if u<e v and False otherwise
 def TestILP(u, Vset, sig):
+    calls = calls + 1
     try:
         env = Env(empty=True) # when set to True, silences console outputs
         env.setParam("OutputFlag",0) # when set to 0, silences console outputs
@@ -146,6 +149,7 @@ def GetEssential():
         P = {(u, y) for y in R[u]}
         temp = ess_set.union(P)
         ess_set = temp
+    print(f"Calls = {calls}")
     return ess_set
   
 
