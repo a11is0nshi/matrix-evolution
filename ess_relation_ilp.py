@@ -95,17 +95,21 @@ def TestILP(u, Vset, sig):
                 v = list(Vset)[v_index]
                 model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (7)
                 model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (7)
-                
-        model.addConstr(sum(z[i, v] for i in range(m) for v in range(len(Vset))) >= 1) # (8)
+        
+        for v in range(len(Vset)):
+            model.addConstr(sum(z[i, v] for i in range(m) ) >= 1) # (8)
 
+        # is it possible to have at most sig 0 -> 1 flips? 
         model.addConstr(sum(X[i, j] * (1 - D[i, j]) for i in range(n) for j in range(m)) == sig) # (9)
 
         model.update()
         model.optimize()
 
         if model.Status == 3:
-            return False
+            print(f"u: {u}, V: {Vset}, sig: {sig} False")
+            return False # u <e v
         else:
+            print(f"u: {u}, V: {Vset}, sig: {sig} True")
             return True
  
     except GurobiError as ex:
@@ -121,7 +125,6 @@ def Split(V):
 # Given a sample index u and set of test sample indices V, GetRelated(u, V) 
 # outputs all samples v ∈ V such that u <e v
 def GetRelated(u, V, sig):
-    print(f"u: {u}, V: {V}")
     if not TestILP(u, V, sig): 
         if len(V) == 1:
             return V
