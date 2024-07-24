@@ -3,8 +3,7 @@ ILP Implementation inspired by (Malikic et. al, 867-868) paper.
 This implementation sets D to be a random binary m x n matrix, where there are 
 m sequenced single cells and n mutations
 
-sig1 is the minimum number of 0 to 1 flips necessary to make D a 
-conflict free matrix while allowing for k 1 to 0 flips. 
+
 """
 from gurobipy import *
 from sys import * 
@@ -19,7 +18,7 @@ k = 0
 df = pd.read_csv(name)
 df.drop_duplicates(inplace=True)
 D = df.to_numpy()
-print(str(D))
+#print(str(D))
 
 n = D.shape[0]  # samples/rows
 m = D.shape[1]  # mutations/cols
@@ -52,7 +51,7 @@ def GetSigma():
         
         model.optimize()
         sig = model.ObjVal
-        print(f"sigma: {sig}")
+        #print(f"sigma: {sig}")
         return sig
 
     except GurobiError as ex:
@@ -106,10 +105,10 @@ def TestILP(u, Vset, sig):
         model.optimize()
 
         if model.Status == 3:
-            print(f"u: {u}, V: {Vset}, sig: {sig} False")
+            #print(f"u: {u}, V: {Vset}, sig: {sig} False")
             return False # u <e v
         else:
-            print(f"u: {u}, V: {Vset}, sig: {sig} True")
+            #print(f"u: {u}, V: {Vset}, sig: {sig} True")
             return True
  
     except GurobiError as ex:
