@@ -86,14 +86,15 @@ def TestILP(u, Vset, sig):
         # Ensure that there are at most k 1->0 flips
         model.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(n) for j in range(m)) <= k) # (5)
 
-
-        
-        z = model.addMVar((m,len(Vset)), vtype=GRB.BINARY, name="z")
+        # New constraints 
+        nz = len(Vset)
+        z = model.addMVar((m,nz), vtype=GRB.BINARY, name="z")
         model.update()
         for i in range(m):
-            for v in range(len(Vset)):
-                model.addConstr(X[u, i] - X[list(Vset)[v]-1, i] <= z[i, v])         # (7)
-                model.addConstr(z[i, v] <= (X[u, i] - X[list(Vset)[v]-1, i] + 1)/2) # (7)
+            for v_index in range(nz):
+                v = list(Vset)[v_index]
+                model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (7)
+                model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (7)
                 
         model.addConstr(sum(z[i, v] for i in range(m) for v in range(len(Vset))) >= 1) # (8)
 
@@ -120,6 +121,7 @@ def Split(V):
 # Given a sample index u and set of test sample indices V, GetRelated(u, V) 
 # outputs all samples v ∈ V such that u <e v
 def GetRelated(u, V, sig):
+    print(f"u: {u}, V: {V}")
     if not TestILP(u, V, sig): 
         if len(V) == 1:
             return V
@@ -142,5 +144,7 @@ def GetEssential():
         temp = ess_set.union(P)
         ess_set = temp
     return ess_set
+  
+
 
 print(f"R: {GetEssential()}")
