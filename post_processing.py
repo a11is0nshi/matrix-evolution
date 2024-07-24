@@ -1,7 +1,7 @@
 # Given R, this will return <e
 from networkx import *
 
-R = {(0,1),(1,0),(2,1),(2,0),(5,6),(6,5),(5,7),(7,5),(6,7),(7,6)}
+R = {(0,1),(1,0),(2,1),(2,0),(5,6),(6,5),(5,7),(7,5),(6,7),(7,6),(9,2),(9,0)}
 Rlist = list(R)
 G = DiGraph(Rlist)
 
@@ -20,8 +20,8 @@ for scc in strongly_connected_components(G):
 # remove nodes from the strongly connected components
 G.remove_nodes_from(remove)
 print(f"nodes: {G.nodes}")
+print(f"edges: {G.edges}")
 
  # ex. (0,1), (1,2), (0,2)  
 G = transitive_reduction(G)
-
-print(f"edges: {G.edges}")
+print(f"edges post trans red: {G.edges}")
