@@ -11,19 +11,18 @@ import csv
 # Change name and k to change file
 name = "smallest_test.csv"
 k = 0 
-calls = 0
+count = 0
 
-# Removes duplicate rows 
+
 df = pd.read_csv(name)
-df.drop_duplicates(inplace=True)
+# df.drop_duplicates(inplace=True)
 D = df.to_numpy()
-print(str(D))
+# print(str(D))
 
 n = D.shape[0]  # samples/rows
 m = D.shape[1]  # mutations/cols
 
 def GetSigma():
-    calls = calls + 1
     try:
         env = Env(empty=True) # when set to True, silences console outputs
         env.setParam("OutputFlag",0) # when set to 0, silences console outputs
@@ -61,7 +60,8 @@ def GetSigma():
 
 # Returns True if u<e v and False otherwise
 def TestILP(u, Vset, sig):
-    calls = calls + 1
+    global count 
+    count = count + 1
     try:
         env = Env(empty=True) # when set to True, silences console outputs
         env.setParam("OutputFlag",0) # when set to 0, silences console outputs
@@ -106,13 +106,13 @@ def TestILP(u, Vset, sig):
         model.optimize()
 
         if model.Status == 3:
-            print(f"u: {u}, V: {Vset}, sig: {sig} False")
+            # print(f"u: {u}, V: {Vset}, sig: {sig} False")
             return False # u <e v
         else:
-            print(f"u: {u}, V: {Vset}, sig: {sig} True")
-            for var in model.getVars():
-                if (var.VarName)[0] == "X":
-                    print(f"{var.VarName} = {var.x}")
+            # print(f"u: {u}, V: {Vset}, sig: {sig} True")
+            # for var in model.getVars():
+            #     if (var.VarName)[0] == "X":
+            #         print(f"{var.VarName} = {var.x}")
             return True
  
     except GurobiError as ex:
@@ -149,10 +149,12 @@ def GetEssential():
         P = {(u, y) for y in R[u]}
         temp = ess_set.union(P)
         ess_set = temp
-    print(f"Calls = {calls}")
+    # print(f"Calls = {calls}")
     return ess_set
   
 
 
 print(f"R: {GetEssential()}")
+print(f"TestILP was called {count} times")
+
 
