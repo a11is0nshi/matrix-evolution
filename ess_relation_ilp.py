@@ -96,7 +96,7 @@ def TestILP(u, Vset, sig):
                 model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (7)
                 model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (7)
         
-        for v in range(len(Vset)):
+        for v in range(nz):
             model.addConstr(sum(z[i, v] for i in range(m) ) >= 1) # (8)
 
         # is it possible to have at most sig 0 -> 1 flips? 
