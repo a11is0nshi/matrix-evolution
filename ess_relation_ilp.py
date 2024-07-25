@@ -10,8 +10,8 @@ import pandas as pd
 import csv
 import time
 
-name = "test"
-beta = 2
+name = "AML"
+beta = 20
 count = 0
 
 fileName = name + ".csv"
@@ -25,7 +25,7 @@ M = {} # maps rows of D to number of times they appear in E
 
 #Calculate the number of duplicates
 for i in range(D.shape[0]):
-    dups = 1
+    dups = 0
     for x in range(E.shape[0]):
         if np.all(D[i] == E[x]):
             dups += 1

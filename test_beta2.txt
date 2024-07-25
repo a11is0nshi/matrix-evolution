@@ -10,3 +10,7 @@ beta = 2
 TestILP was called 9 times
 Time: 0.2489032745361328
 R: {(0, 2), (1, 2)}
+beta = 2
+TestILP was called 9 times
+Time: 0.3074061870574951
+R: {(0, 2), (1, 2)}
