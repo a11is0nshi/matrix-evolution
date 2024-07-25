@@ -1,0 +1,12 @@
+beta = 2
+TestILP was called 3 times
+Time: 0.22225093841552734
+R: set()
+beta = 2
+TestILP was called 5 times
+Time: 0.20819497108459473
+R: set()
+beta = 2
+TestILP was called 9 times
+Time: 0.2489032745361328
+R: {(0, 2), (1, 2)}

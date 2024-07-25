@@ -10,13 +10,11 @@ import pandas as pd
 import csv
 import time
 
-
-name = "AML"
-beta = 20
+name = "test"
+beta = 2
 count = 0
 
 fileName = name + ".csv"
-
 
 df = pd.read_csv(fileName)
 E = df.to_numpy() # has duplicates
@@ -27,7 +25,7 @@ M = {} # maps rows of D to number of times they appear in E
 
 #Calculate the number of duplicates
 for i in range(D.shape[0]):
-    dups = 0
+    dups = 1
     for x in range(E.shape[0]):
         if np.all(D[i] == E[x]):
             dups += 1
@@ -49,7 +47,7 @@ def GetSigma():
         X = model.addMVar((n,m), vtype=GRB.BINARY, name="X")
 
         # Objective function
-        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
         
         B01 = model.addMVar((m,m), vtype=GRB.BINARY, name="B01")
@@ -113,7 +111,7 @@ def TestILP(u, Vset, sig):
             model.addConstr(sum(z[i, v] for i in range(m) ) >= 1) # (8)
 
         # is it possible to have at most sig 0 -> 1 flips? 
-        model.addConstr(sum(X[i, j] * (1 - D[i, j]) for i in range(n) for j in range(m)) == sig) # (9)
+        model.addConstr(sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n)) == sig) # (9)
 
         model.update()
         model.optimize()
@@ -166,7 +164,7 @@ def GetEssential():
     return ess_set
   
 R = GetEssential()
-filename = name + "_beta" + beta + ".txt"
+filename = name + "_beta" + str(beta) + ".txt"
 f = open(filename, "a")
 f.write(f"beta = {beta}\n")
 f.write(f"TestILP was called {count} times\n")
