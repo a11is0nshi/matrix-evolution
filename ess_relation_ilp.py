@@ -11,7 +11,7 @@ import csv
 import time
 
 name = "AML"
-beta = 20
+beta = 1
 count = 0
 
 fileName = name + ".csv"
@@ -169,7 +169,7 @@ f = open(filename, "a")
 f.write(f"beta = {beta}\n")
 f.write(f"TestILP was called {count} times\n")
 f.write(f"Time: {time.time() - start_time}\n")
-f.write(f"R: {R}\n")
+f.write(f"R = {R}\n")
 print("done!")
 # print(f"R: {GetEssential()}")
 # print(f"TestILP was called {count} times")
