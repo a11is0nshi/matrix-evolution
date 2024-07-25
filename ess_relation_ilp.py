@@ -9,13 +9,13 @@ import numpy as np
 import pandas as pd
 import csv
 # Change name and k to change file
-name = "smallest_test.csv"
-k = 0 
+name = "AML-10_rep10.csv"
+k = 1
 count = 0
 
 
 df = pd.read_csv(name)
-# df.drop_duplicates(inplace=True)
+df.drop_duplicates(inplace=True)
 D = df.to_numpy()
 # print(str(D))
 
