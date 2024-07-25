@@ -11,7 +11,7 @@ import csv
 import time
 
 
-name = "AML-10_rep10"
+name = "AML"
 beta = 20
 count = 0
 
@@ -166,7 +166,7 @@ def GetEssential():
     return ess_set
   
 R = GetEssential()
-filename = "results_" + name + "beta" + {beta} + ".txt"
+filename = name + "_beta" + {beta} + ".txt"
 f = open(filename, "a")
 f.write(f"beta = {beta}\n")
 f.write(f"TestILP was called {count} times\n")
