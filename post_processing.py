@@ -7,9 +7,10 @@ import graphviz
 # this will be the set that is read in from the text file
 # s = eval(f)
 
-
-R = {(0, 1), (0, 7), (0, 4), (2, 1), (7, 1), (3, 1), (4, 6), (5, 1), (0, 6), (0, 2), (7, 6), (2, 6), (5, 6), (3, 6), (3, 2), (4, 1), (5, 2)}
-filename = "edgelist.txt"
+data_set = "AML-10"
+R = {(0, 1), (0, 2), (0, 6)}
+k = 2
+# filename = "edgelist.txt"
 # input: set R, output list of edges
 def prune(R):
   Rlist = list(R)
@@ -26,20 +27,21 @@ def prune(R):
   G = transitive_reduction(G)   # ex. (0,1), (1,2), (0,2) 
   return G
   
-
 def genGraph():
   G = prune(R)
-  dot = graphviz.Digraph()
+  dot = graphviz.Digraph(filename=f"{data_set}_k-{k}.gv")
   for edge in G.edges():
       dot.edge(str(edge[0]), str(edge[1]))
-  dot.view
+  dot.view()
   # Save and render the graph
   # dot.render('graph', format='png', cleanup=True)
 
+"""
 def edgesToFile():
   G = prune(R)
   f = open(filename, "a")
   f.write(str(G.edges()))
   print(f"edges post trans red: {G.edges}")
+"""
 
 genGraph()
