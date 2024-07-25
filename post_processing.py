@@ -7,8 +7,8 @@ import graphviz
 # this will be the set that is read in from the text file
 # s = eval(f)
 
-data_set = "full_AML-10"
-R = {(0, 1), (0, 10), (3, 1), (5, 1), (0, 6), (0, 2), (9, 1), (0, 11)}
+data_set = "testNodes"
+R = {(0, 1), (1,0), (1,2),(0,2),(1,3), (0,3)}
 k = 2
 # filename = "edgelist.txt"
 # input: set R, output list of edges
@@ -23,6 +23,12 @@ def prune(R):
           for i in range(len(l)):
               if i != 0:
                   remove.append(l[i])
+              if i == 0:
+                  print(f"l[i] = {l[i]}")
+                  print(f"scc = {scc}")
+                  G = relabel_nodes(G, {l[0]: str(scc)})
+                  print(f"G.nodes = {G.nodes()}")
+                 
   G.remove_nodes_from(remove)     # ex. (1,0), (0,1)
   G = transitive_reduction(G)   # ex. (0,1), (1,2), (0,2) 
   return G
@@ -34,7 +40,7 @@ def genGraph():
       dot.edge(str(edge[0]), str(edge[1]))
   # dot.view()
   # Save and render the graph
-  dot.render(f"{data_set}_k-{k}.gv", format='png', cleanup=True)
+  dot.render(f"{data_set}_k{k}", format='png', cleanup=True)
 
 """
 def edgesToFile():
