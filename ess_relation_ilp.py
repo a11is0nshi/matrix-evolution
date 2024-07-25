@@ -10,17 +10,29 @@ import pandas as pd
 import csv
 import time
 
-# Change name and k to change file
+
 name = "AML-10_rep10"
-file = name + ".csv"
+k = 0
 beta = 20
 count = 0
 
-df = pd.read_csv(file)
+file = name + ".csv"
+
+
+df = pd.read_csv(name)
+E = df.to_numpy() # has duplicates
+
 df.drop_duplicates(inplace=True)
-D = df.to_numpy()
-M = dict()
-# print(str(D))
+D = df.to_numpy(dtype=int) # no duplicates
+M = {} # maps rows of D to number of times they appear in E
+
+#Calculate the number of duplicates
+for i in range(D.shape[0]):
+    dups = 0
+    for x in range(E.shape[0]):
+        if np.all(D[x] == E[i]):
+            dups += 1
+    M[i] = dups
 
 n = D.shape[0]  # samples/rows
 m = D.shape[1]  # mutations/cols
