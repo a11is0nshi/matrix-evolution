@@ -61,6 +61,8 @@ def GetSigma():
 # Returns True if u<e v and False otherwise
 def TestILP(u, Vset, sig):
     global count 
+    if count % 50 == 0:
+        print(count)
     count = count + 1
     try:
         env = Env(empty=True) # when set to True, silences console outputs
