@@ -50,7 +50,7 @@ def GetSigma():
         X = model.addMVar((n,m), vtype=GRB.BINARY, name="X")
 
         # Objective function
-        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i](D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
         model.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(n) for j in range(m)) <= k)
         
@@ -92,7 +92,7 @@ def TestILP(u, Vset, sig):
         B10 = model.addMVar((m, m), vtype=GRB.BINARY, name="B10")
         B11 = model.addMVar((m, m), vtype=GRB.BINARY, name="B11")
 
-        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i](D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
 
         # Enforce no conflicts by checking each pair of columns (p, q)) 
