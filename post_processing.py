@@ -7,9 +7,9 @@ import graphviz
 # this will be the set that is read in from the text file
 # s = eval(f)
 
-data_set = "AML-10"
-R = {(0, 1), (0, 7), (0, 4), (2, 1), (2, 7), (3, 4), (3, 1), (3, 7), (5, 4), (4, 6), (6, 1), (5, 1), (5, 7), (0, 2), (7, 6), (0, 5), (1, 6), (3, 2), (4, 1), (4, 7), (5, 2), (7, 1), (0, 3), (4, 2), (0, 6), (2, 6), (5, 6), (7, 2), (3, 6)}
-k = 0
+data_set = "full_AML-10"
+R = {(0, 1), (0, 10), (3, 1), (5, 1), (0, 6), (0, 2), (9, 1), (0, 11)}
+k = 2
 # filename = "edgelist.txt"
 # input: set R, output list of edges
 def prune(R):
