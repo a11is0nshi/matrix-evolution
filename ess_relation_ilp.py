@@ -13,12 +13,13 @@ import time
 # Change name and k to change file
 name = "AML-10_rep10"
 file = name + ".csv"
-k = 2
+beta = 20
 count = 0
 
 df = pd.read_csv(file)
 df.drop_duplicates(inplace=True)
 D = df.to_numpy()
+M = dict()
 # print(str(D))
 
 n = D.shape[0]  # samples/rows
@@ -37,7 +38,7 @@ def GetSigma():
         X = model.addMVar((n,m), vtype=GRB.BINARY, name="X")
 
         # Objective function
-        total = sum(sum((1 - D[i, j])*(X[i, j]) + (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i](D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
         model.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(n) for j in range(m)) <= k)
         
@@ -79,7 +80,7 @@ def TestILP(u, Vset, sig):
         B10 = model.addMVar((m, m), vtype=GRB.BINARY, name="B10")
         B11 = model.addMVar((m, m), vtype=GRB.BINARY, name="B11")
 
-        total = sum(sum((1 - D[i, j])*(X[i, j]) + (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i](D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
 
         # Enforce no conflicts by checking each pair of columns (p, q)) 
