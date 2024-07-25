@@ -13,25 +13,18 @@ k = 2
 # filename = "edgelist.txt"
 # input: set R, output list of edges
 def prune(R):
-  Rlist = list(R)
-  G = DiGraph(Rlist)
-  G.remove_edges_from(selfloop_edges(G))   # ex. (1,1)
-  remove = []
-  for scc in strongly_connected_components(G):
-      if len(scc) > 1:
-          l = list(scc)
-          for i in range(len(l)):
-              if i != 0:
-                  remove.append(l[i])
-              if i == 0:
-                  print(f"l[i] = {l[i]}")
-                  print(f"scc = {scc}")
-                  G = relabel_nodes(G, {l[0]: str(scc)})
-                  print(f"G.nodes = {G.nodes()}")
-                 
-  G.remove_nodes_from(remove)     # ex. (1,0), (0,1)
-  G = transitive_reduction(G)   # ex. (0,1), (1,2), (0,2) 
-  return G
+    Rlist = list(R)
+    G = DiGraph(Rlist)
+    for scc in strongly_connected_components(G):
+        l1 = [num for num in scc]
+        l2 = [str(scc)[1:len(str(scc))-1] for i in range(len(scc))]
+        mapping = dict(zip(l1, l2))
+        G = relabel_nodes(G, mapping)
+    G.remove_edges_from(selfloop_edges(G))
+    print(G.nodes)
+    print(G.edges)
+    G = transitive_reduction(G)   # ex. (0,1), (1,2), (0,2) 
+    return G
   
 def genGraph():
   G = prune(R)
