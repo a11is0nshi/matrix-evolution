@@ -8,18 +8,22 @@ from sys import *
 import numpy as np
 import pandas as pd
 import csv
+import time
+
 # Change name and k to change file
-name = "AML-10_rep10.csv"
+name = "AML-10_rep10"
+file = name + ".csv"
 k = 2
 count = 0
 
-df = pd.read_csv(name)
+df = pd.read_csv(file)
 df.drop_duplicates(inplace=True)
 D = df.to_numpy()
 # print(str(D))
 
 n = D.shape[0]  # samples/rows
 m = D.shape[1]  # mutations/cols
+start_time = time.time()
 
 def GetSigma():
     try:
@@ -153,9 +157,16 @@ def GetEssential():
     # print(f"Calls = {calls}")
     return ess_set
   
-
-
-print(f"R: {GetEssential()}")
-print(f"TestILP was called {count} times")
+R = GetEssential()
+filename = "results_" + name + "k" + str(k)  + ".txt"
+f = open(filename, "a")
+f.write(f"k = {k}\n")
+f.write(f"TestILP was called {count} times\n")
+f.write(f"Time: {time.time() - start_time}\n")
+f.write(f"R: {R}\n")
+print("done!")
+# print(f"k = {k}")
+# print(f"R: {GetEssential()}")
+# print(f"TestILP was called {count} times")
 
 
