@@ -30,7 +30,7 @@ M = {} # maps rows of D to number of times they appear in E
 for i in range(D.shape[0]):
     dups = 0
     for x in range(E.shape[0]):
-        if np.all(D[x] == E[i]):
+        if np.all(D[i] == E[x]):
             dups += 1
     M[i] = dups
 
