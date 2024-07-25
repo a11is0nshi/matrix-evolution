@@ -166,7 +166,7 @@ def GetEssential():
     return ess_set
   
 R = GetEssential()
-filename = name + "_beta" + {beta} + ".txt"
+filename = name + "_beta" + beta + ".txt"
 f = open(filename, "a")
 f.write(f"beta = {beta}\n")
 f.write(f"TestILP was called {count} times\n")
