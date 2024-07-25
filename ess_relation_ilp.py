@@ -12,7 +12,6 @@ import time
 
 
 name = "AML-10_rep10"
-k = 2
 beta = 20
 count = 0
 
@@ -52,7 +51,6 @@ def GetSigma():
         # Objective function
         total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + beta*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
-        model.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(n) for j in range(m)) <= k)
         
         B01 = model.addMVar((m,m), vtype=GRB.BINARY, name="B01")
         B10 = model.addMVar((m,m), vtype=GRB.BINARY, name="B10")
@@ -101,9 +99,6 @@ def TestILP(u, Vset, sig):
         model.addConstrs(X[i, p] + X[i, q] -1  <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n)) # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m)) # (4)
         
-        # Ensure that there are at most k 1->0 flips
-        model.addConstr(sum(D[i, j] * (1 - X[i, j]) for i in range(n) for j in range(m)) <= k) # (5)
-
         # New constraints 
         nz = len(Vset)
         z = model.addMVar((m,nz), vtype=GRB.BINARY, name="z")
@@ -155,7 +150,7 @@ def GetRelated(u, V, sig):
     else: 
         return set()
         
-# Given a matrix D and positive integer k, GetEssential(D, k) outputs <e
+# Given a matrix D, GetEssential(D) outputs <e
 def GetEssential():
     sig = GetSigma()
     S = {num for num in range(D.shape[0])}
@@ -171,14 +166,13 @@ def GetEssential():
     return ess_set
   
 R = GetEssential()
-filename = "results_" + name + "k" + str(k)  + ".txt"
+filename = "results_" + name + "beta" + {beta} + ".txt"
 f = open(filename, "a")
-f.write(f"k = {k}\n")
+f.write(f"beta = {beta}\n")
 f.write(f"TestILP was called {count} times\n")
 f.write(f"Time: {time.time() - start_time}\n")
 f.write(f"R: {R}\n")
 print("done!")
-# print(f"k = {k}")
 # print(f"R: {GetEssential()}")
 # print(f"TestILP was called {count} times")
 
