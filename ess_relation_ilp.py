@@ -12,14 +12,14 @@ import time
 
 
 name = "AML-10_rep10"
-k = 0
+k = 2
 beta = 20
 count = 0
 
-file = name + ".csv"
+fileName = name + ".csv"
 
 
-df = pd.read_csv(name)
+df = pd.read_csv(fileName)
 E = df.to_numpy() # has duplicates
 
 df.drop_duplicates(inplace=True)
