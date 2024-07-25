@@ -9,15 +9,14 @@ import numpy as np
 import pandas as pd
 import csv
 # Change name and k to change file
-name = "AML-10_rep10.csv"
-k = 1
+name = "first_50_AML-10_rep10.csv"
+k = 0
 count = 0
-
 
 df = pd.read_csv(name)
 df.drop_duplicates(inplace=True)
 D = df.to_numpy()
-# print(str(D))
+print(str(D))
 
 n = D.shape[0]  # samples/rows
 m = D.shape[1]  # mutations/cols
@@ -61,8 +60,8 @@ def GetSigma():
 # Returns True if u<e v and False otherwise
 def TestILP(u, Vset, sig):
     global count 
-    if count % 50 == 0:
-        print(count)
+    # if count % 50 == 0:
+        # print(count)
     count = count + 1
     try:
         env = Env(empty=True) # when set to True, silences console outputs
@@ -111,10 +110,10 @@ def TestILP(u, Vset, sig):
             # print(f"u: {u}, V: {Vset}, sig: {sig} False")
             return False # u <e v
         else:
-            # print(f"u: {u}, V: {Vset}, sig: {sig} True")
-            # for var in model.getVars():
-            #     if (var.VarName)[0] == "X":
-            #         print(f"{var.VarName} = {var.x}")
+            print(f"u: {u}, V: {Vset}, sig: {sig} True")
+            for var in model.getVars():
+                if (var.VarName)[0] == "X":
+                    print(f"{var.VarName} = {var.x}")
             return True
  
     except GurobiError as ex:
