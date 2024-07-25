@@ -8,8 +8,8 @@ import graphviz
 # s = eval(f)
 
 data_set = "AML-10"
-R = {(0, 1), (0, 2), (0, 6)}
-k = 2
+R = {(0, 1), (0, 7), (0, 4), (2, 1), (2, 7), (3, 4), (3, 1), (3, 7), (5, 4), (4, 6), (6, 1), (5, 1), (5, 7), (0, 2), (7, 6), (0, 5), (1, 6), (3, 2), (4, 1), (4, 7), (5, 2), (7, 1), (0, 3), (4, 2), (0, 6), (2, 6), (5, 6), (7, 2), (3, 6)}
+k = 0
 # filename = "edgelist.txt"
 # input: set R, output list of edges
 def prune(R):
@@ -32,9 +32,9 @@ def genGraph():
   dot = graphviz.Digraph(filename=f"{data_set}_k-{k}.gv")
   for edge in G.edges():
       dot.edge(str(edge[0]), str(edge[1]))
-  dot.view()
+  # dot.view()
   # Save and render the graph
-  # dot.render('graph', format='png', cleanup=True)
+  dot.render(f"{data_set}_k-{k}.gv", format='png', cleanup=True)
 
 """
 def edgesToFile():
