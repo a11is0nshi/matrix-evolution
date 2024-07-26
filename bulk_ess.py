@@ -8,25 +8,25 @@ from sys import *
 import numpy as np
 import pandas as pd
 import csv
-import time
+import time as t
 from networkx import *
 import graphviz
 
-patient = "AML10_"
+patient = "z_"
 beta = 1
 
 filename = patient + "results.txt"
-f = open(filename, "a")
-f.write(f"Name \t Beta \t Calls \t Time \t Width \t Nodes \t Sigma \t Edges\n\n")
+f = open(filename, "w")
+f.write(f"Name \t Beta \t Calls \t Width \t Nodes \t Sigma \t time \t Edges\n\n")
 
 
 
 # each file has to be named like this: AML10_1.csv
-def ess(f, name, beta, count):
+def ess(f, name, beta):
   fileName = name + ".csv"
   df = pd.read_csv(fileName)
   E = df.to_numpy() # has duplicates
-
+#   count = 0
   df.drop_duplicates(inplace=True)
   D = df.to_numpy(dtype=int) # no duplicates
   M = {} # maps rows of D to number of times they appear in E
@@ -41,7 +41,6 @@ def ess(f, name, beta, count):
 
   n = D.shape[0]  # samples/rows
   m = D.shape[1]  # mutations/cols
-  start_time = time.time()
 
   def GetSigma():
       try:
@@ -80,10 +79,10 @@ def ess(f, name, beta, count):
 
   # Returns True if u<e v and False otherwise
   def TestILP(u, Vset, sig):
-      global count 
-      if count % 50 == 0:
-          print(count)
-      count = count + 1
+    #   global count 
+    #   if count % 50 == 0:
+    #       print(count)
+    #   count = count + 1
       try:
           env = Env(empty=True) # when set to True, silences console outputs
           env.setParam("OutputFlag",0) # when set to 0, silences console outputs
@@ -162,6 +161,7 @@ def ess(f, name, beta, count):
       S = {num for num in range(D.shape[0])}
       ess_set = set()
       R = []
+      start_time = t.time()
       for u in S:
           V = S.difference({u})
           R.append(GetRelated(u, V, sig))
@@ -169,7 +169,8 @@ def ess(f, name, beta, count):
           temp = ess_set.union(P)
           ess_set = temp
       # print(f"Calls = {calls}")
-      return ess_set, sigma
+      time = t.time() - start_time
+      return ess_set, sig, time
   
   def prune(R):
     Rlist = list(R)
@@ -190,13 +191,13 @@ def ess(f, name, beta, count):
     return max
   
   
-  R, sigma = GetEssential()
-  time = time.time() - start_time
+  R, sigma, time = GetEssential()
+  
   G = prune(R)
   width = str(width(G))
   numNodes = str(G.number_of_nodes())
   edges = str(G.edges)
-  f.write(f"{name} \t {beta} \t {count} \t {time} \t {width} \t {numNodes} \t {sigma} \t {edges} \n")
+  f.write(f"{name} \t {beta} \t  \t {width} \t {numNodes} \t {sigma} \t {time} \t {edges} \n")
   print(f"completed {name}!")
   
   # print(f"R: {GetEssential()}")
@@ -205,5 +206,5 @@ def ess(f, name, beta, count):
 
 for i in range(1, 11):
     name = patient + str(i)
-    ess(f, name, beta, 0)
+    ess(f, name, beta)
 print("Done!")
