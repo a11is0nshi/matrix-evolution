@@ -1,8 +1,0 @@
-beta = 1
-TestILP was called 3 times
-Time: 0.21939420700073242
-R = set()
-beta = 1
-TestILP was called 3 times
-Time: 0.2036752700805664
-R = set()
