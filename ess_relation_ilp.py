@@ -10,8 +10,8 @@ import pandas as pd
 import csv
 import time
 
-name = "AML67"
-beta = 2.1
+name = "AML10"
+beta = 1
 count = 0
 
 fileName = name + ".csv"
@@ -72,10 +72,10 @@ def GetSigma():
 
 # Returns True if u<e v and False otherwise
 def TestILP(u, Vset, sig):
-    global count 
-    if count % 50 == 0:
-        print(count)
-    count = count + 1
+    # global count 
+    # if count % 50 == 0:
+        # print(count)
+    # count = count + 1
     try:
         env = Env(empty=True) # when set to True, silences console outputs
         env.setParam("OutputFlag",0) # when set to 0, silences console outputs
@@ -139,6 +139,8 @@ def Split(V):
 # Given a sample index u and set of test sample indices V, GetRelated(u, V) 
 # outputs all samples v ∈ V such that u <e v
 def GetRelated(u, V, sig):
+    global count
+    count += 1
     if not TestILP(u, V, sig): 
         if len(V) == 1:
             return V
