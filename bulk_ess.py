@@ -12,12 +12,12 @@ import time as t
 from networkx import *
 import graphviz
 
-patient = "z_"
+patient = "AML10_"
 beta = 1
 
-filename = patient + "results.txt"
+filename = patient + "B" + str(beta) +  "_results.txt"
 f = open(filename, "w")
-f.write(f"Name \t Beta \t Calls \t Width \t Nodes \t Sigma \t time \t Edges\n\n")
+f.write(f"Name \t Calls \t Width \t Nodes \t Sigma \t time \t Edges\n\n")
 
 def GetSigma(D, M):
     try:
@@ -62,7 +62,6 @@ def TestILP(D, M, u, Vset, sig, count):
     #  if count % 50 == 0:
     #  print(count)
     count = count + 1
-    print(count)
     try:
         n = D.shape[0]  # samples/rows
         m = D.shape[1]  # mutations/cols
@@ -106,13 +105,8 @@ def TestILP(D, M, u, Vset, sig, count):
         model.optimize()
 
         if model.Status == 3:
-            # print(f"u: {u}, V: {Vset}, sig: {sig} False")
             return False, count # u <e v
         else:
-            # print(f"u: {u}, V: {Vset}, sig: {sig} True")
-            # for var in model.getVars():
-            #     if (var.VarName)[0] == "X":
-            #         print(f"{var.VarName} = {var.x}")
             return True, count
   
     except GurobiError as ex:
@@ -153,12 +147,10 @@ def GetEssential(D, M):
         V = S.difference({u})
         new_set, new_count = GetRelated(D, M, u, V, sig, count)
         count = new_count
-        # print(f"new count {new_count}")
         R.append(new_set)
         P = {(u, y) for y in R[u]}
         temp = ess_set.union(P)
         ess_set = temp
-    # print(f"Calls = {calls}")
     time = t.time() - start_time
     return ess_set, sig, time, count
 
@@ -185,7 +177,6 @@ def ess(f, name, beta):
     fileName = name + ".csv"
     df = pd.read_csv(fileName)
     E = df.to_numpy() # has duplicates
-    # count = 0
     df.drop_duplicates(inplace=True)
     D = df.to_numpy(dtype=int) # no duplicates
     M = {} # maps rows of D to number of times they appear in E
@@ -204,13 +195,13 @@ def ess(f, name, beta):
     w = str(width(G))
     numNodes = str(G.number_of_nodes())
     edges = str(G.edges)
-    f.write(f"{name} \t {beta} \t {count} \t {w} \t {numNodes} \t {sigma} \t {time} \t {edges} \n")
-    # print(f"completed {name}!")
+    f.write(f"{name} \t {count} \t {w} \t {numNodes} \t {sigma} \t {time} \t {edges} \n")
+    print(f"completed {name}!")
   
   # print(f"R: {GetEssential()}")
   # print(f"TestILP was called {count} times")
 
-for i in range(1, 11):
+for i in range(1, 2):
     name = patient + str(i)
     ess(f, name, beta)
 print("Done!")
