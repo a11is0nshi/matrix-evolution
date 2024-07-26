@@ -10,8 +10,8 @@ import pandas as pd
 import csv
 import time
 
-name = "AML-67"
-beta = 1
+name = "AML67"
+beta = 5
 count = 0
 
 fileName = name + ".csv"
