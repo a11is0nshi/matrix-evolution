@@ -57,11 +57,12 @@ def GetSigma(D, M):
         return -1
 
 # Returns True if u<e v and False otherwise
-def TestILP(D, M, u, Vset, sig):
+def TestILP(D, M, u, Vset, sig, count):
     #   global count 
     #  if count % 50 == 0:
     #  print(count)
-    #   count = count + 1
+    count = count + 1
+    print(count)
     try:
         n = D.shape[0]  # samples/rows
         m = D.shape[1]  # mutations/cols
@@ -106,13 +107,13 @@ def TestILP(D, M, u, Vset, sig):
 
         if model.Status == 3:
             # print(f"u: {u}, V: {Vset}, sig: {sig} False")
-            return False # u <e v
+            return False, count # u <e v
         else:
             # print(f"u: {u}, V: {Vset}, sig: {sig} True")
             # for var in model.getVars():
             #     if (var.VarName)[0] == "X":
             #         print(f"{var.VarName} = {var.x}")
-            return True
+            return True, count
   
     except GurobiError as ex:
         print('*********ERROR*********')
@@ -126,14 +127,14 @@ def Split(V):
 # Given a sample index u and set of test sample indices V, GetRelated(u, V) 
 # outputs all samples v ∈ V such that u <e v
 def GetRelated(D, M, u, V, sig, count):
-    count += 1
-    if not TestILP(D, M, u, V, sig): 
+    val, count = TestILP(D, M, u, V, sig, count)
+    if not val: 
         if len(V) == 1:
             return V, count
         else: 
             Vl, Vr = Split(V)
-            Sl, cl = GetRelated(D, M, u, Vl, sig, count)
-            Sr, cr = GetRelated(D, M, u, Vr, sig, count)
+            Sl, cl = GetRelated(D, M, u, Vl, sig, 0)
+            Sr, cr = GetRelated(D, M, u, Vr, sig, 0)
             new_set = Sl.union(Sr)
             count = count + cl + cr
             return new_set, count
@@ -152,6 +153,7 @@ def GetEssential(D, M):
         V = S.difference({u})
         new_set, new_count = GetRelated(D, M, u, V, sig, count)
         count = new_count
+        # print(f"new count {new_count}")
         R.append(new_set)
         P = {(u, y) for y in R[u]}
         temp = ess_set.union(P)
@@ -203,7 +205,7 @@ def ess(f, name, beta):
     numNodes = str(G.number_of_nodes())
     edges = str(G.edges)
     f.write(f"{name} \t {beta} \t {count} \t {w} \t {numNodes} \t {sigma} \t {time} \t {edges} \n")
-    print(f"completed {name}!")
+    # print(f"completed {name}!")
   
   # print(f"R: {GetEssential()}")
   # print(f"TestILP was called {count} times")
