@@ -195,7 +195,7 @@ def ess(f, name, beta, count):
   G = prune(R)
   width = str(width(G))
   numNodes = str(G.number_of_nodes())
-  edges = str(G.edge)
+  edges = str(G.edges)
   f.write(f"{name} \t {beta} \t {count} \t {time} \t {width} \t {numNodes} \t {sigma} \t {edges} \n")
   print(f"completed {name}!")
   
