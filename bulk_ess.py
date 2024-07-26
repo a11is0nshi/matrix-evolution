@@ -132,7 +132,10 @@ def GetRelated(D, M, u, V, sig, count):
             return V, count
         else: 
             Vl, Vr = Split(V)
-            new_set = GetRelated(D, M, u, Vl, sig, count).union(GetRelated(D, M, u, Vr, sig, count))
+            Sl, cl = GetRelated(D, M, u, Vl, sig, count)
+            Sr, cr = GetRelated(D, M, u, Vr, sig, count)
+            new_set = Sl.union(Sr)
+            count = count + cl + cr
             return new_set, count
     else: 
         return set(), count
