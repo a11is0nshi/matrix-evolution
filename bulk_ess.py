@@ -12,8 +12,8 @@ import time as t
 from networkx import *
 import graphviz
 
-patient = "AML10_"
-beta = 1
+patient = "AML67_"
+beta = 20
 
 filename = patient + "B" + str(beta) +  "_results.txt"
 f = open(filename, "w")
@@ -201,7 +201,7 @@ def ess(f, name, beta):
   # print(f"R: {GetEssential()}")
   # print(f"TestILP was called {count} times")
 
-for i in range(1, 2):
+for i in range(1, 11):
     name = patient + str(i)
     ess(f, name, beta)
 print("Done!")

@@ -10,8 +10,8 @@ import pandas as pd
 import csv
 import time
 
-name = "AML10_1"
-beta = 1
+name = "AML10_7"
+beta = 3
 count = 0
 
 fileName = name + ".csv"
@@ -72,9 +72,9 @@ def GetSigma():
 
 # Returns True if u<e v and False otherwise
 def TestILP(u, Vset, sig):
-    # global count 
-    # if count % 50 == 0:
-        # print(count)
+    global count 
+    if count % 50 == 0:
+        print(count)
     count = count + 1
     # print(count)
     try:
