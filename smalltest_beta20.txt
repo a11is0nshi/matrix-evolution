@@ -1,0 +1,8 @@
+beta = 20
+TestILP was called 12 times
+Time: 0.7980589866638184
+R = {(1, 0), (1, 2), (0, 3), (1, 3)}
+beta = 20
+TestILP was called 12 times
+Time: 0.6309962272644043
+R = {(1, 0), (1, 2), (0, 3), (1, 3)}
