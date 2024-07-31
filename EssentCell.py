@@ -245,12 +245,10 @@ def Width(G):
 fileResults = outputName + "_kappa" + str(kappa) + ".txt"
 
 choice = input("\nColor graph? (Y/N): ")
-if choice.lower().strip() == "n": 
-    G = GenGraph("none")
 if choice.lower().strip() == "y":
     G = GenGraph(input("\nEnter color (https://graphviz.org/doc/info/colors.html): "))
 else:
-    E = input("\n Please enter Y or N: ")
+    G = GenGraph("none")
 if verbose:
     f = open(fileResults, "a")
     f.write(f"kappa: {kappa}\n")
