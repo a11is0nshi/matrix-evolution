@@ -41,7 +41,7 @@ fileName = input("\nEnter csv file name: ")
 outputName = fileName[:-4]
 kappa = int(input("\nEnter positive integer, kappa = "))
 askVerbose = input("\nVerbose detail file? (Y/N): ")
-verbose = askVerbose.lower() == "y"
+verbose = askVerbose.lower().strip() == "y"
 
 count = 0
 
@@ -244,11 +244,12 @@ def Width(G):
 fileResults = outputName + "_kappa" + str(kappa) + ".txt"
 
 choice = input("\nColor graph? (Y/N): ")
-if choice.lower() == "n": 
+if choice.lower().strip() == "n": 
     G = GenGraph("none")
-if choice.lower() == "y":
+if choice.lower().strip() == "y":
     G = GenGraph(input("\nEnter color (https://graphviz.org/doc/info/colors.html): "))
-
+else:
+    E = input("\n Please enter Y or N: ")
 if verbose:
     f = open(fileResults, "a")
     f.write(f"kappa: {kappa}\n")
