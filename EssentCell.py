@@ -1,21 +1,33 @@
 """
-EssentCell implementation. Inspired by the ILP formulation in Malikic et. al, 867-868. 
+Given a positive integer kappa, and n x m binary mutation matrix, EssentCell 
+produces the corresponding essential order diagram. 
 
-Asks the user for a CSV file containing binary matrix data, transforms this data into 
-a binary mutation matrix D, and extracts the essential partial order relation. 
+Optinally produced verbose detail file, containing kappa, n, m, poset width,
+number of nodes, number of times EssILP was called, and the relation itself. 
 
-D is a binary n x m matrix, where there are n sequenced single cells and m mutations. 
+Example Usage: 
 
-Additional user-provided parameters: kappa, the option to customize the results (essential 
-partial order graph and output file or graph only), the color of the graph nodes. 
+$ python EssentCell.py 
+- Enter csv file name:
+$ patient.csv
+- Enter positive integer, kappa = 
+$ 1
+- Verbose detail file? (Y/N)
+$ Y
+- Color graph? (Y/N)
+$ Y 
+- Enter color (https://graphviz.org/doc/info/colors.html):
+$ aquamarine 
+- Results written to file: patient_k1.txt
+- Graph generated: patient_k1.png
 
-Outputs the essential partial order graph in .png format and, if specified, a .txt file 
-containing the kappa value, the dimensions of the input binary matrix, the number of calls 
-to EssILP, the runtime in seconds, the number of nodes in the graph, the poset width of 
-the graph, and the relation itself. 
 
-Authors: Allison Shi and Robyn Burger. 
-"""
+Implemented by Robyn Burger and Allison Shi as part of paper "EssentCell: 
+Discovering Essential Evolutionary Relations in Noisy Single-Cell Data" by Robyn 
+Burger, Allison Shi, Dr. Brendan Mumey, Dr. Adiesha Liyanage, and Dr. Binhai 
+Zhu.
+
+ """
 from gurobipy import *
 from sys import * 
 import numpy as np
@@ -24,29 +36,22 @@ import time
 from networkx import *
 import graphviz
 
-# Ask for name of .csv file and desired kappa value
-print("Enter name of csv file containing binary matrix data. (Must end in .csv)")
-fileName = input("\nCSV file name: ")
-outputName = fileName[:-4]
-kappa = int(input("\nEnter kappa value: "))
 
-# Determine whether to output graph and output file or graph only
-askVerbose = input("\nEnter 'Y' to generate graph and output file. 'N' for graph only: ")
+fileName = input("\nEnter csv file name: ")
+outputName = fileName[:-4]
+kappa = int(input("\nEnter positive integer, kappa = "))
+askVerbose = input("\nVerbose detail file? (Y/N): ")
 verbose = askVerbose.lower() == "y"
 
-# Initialize variable to track EssILP calls
 count = 0
 
-# Transform csv data to a NumPy matrix (may have duplicates)
 df = pd.read_csv(fileName)
 E = df.to_numpy()
 
-# Remove duplicates from the input matrix
 df.drop_duplicates(inplace=True)
 D = df.to_numpy(dtype=int)
 
 # Calculate the multiplicities of each row i in D
-# Map the rows of D to the number of times they appear in E
 M = {}
 for i in range(D.shape[0]):
     dups = 0
@@ -55,11 +60,9 @@ for i in range(D.shape[0]):
             dups += 1
     M[i] = dups
 
-# Extract the dimensions of D
 n = D.shape[0] 
 m = D.shape[1]
 
-# Start time for runtime metric
 start_time = time.time()
 
 """
@@ -77,16 +80,13 @@ def FindOpt():
         # X will be constrained to be a conflict-free matrix
         X = model.addMVar((n,m), vtype=GRB.BINARY, name="X")
 
-        # Set objective function
         total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
         
-        # Add additional variables to ensure that X is conflict-free
         B01 = model.addMVar((m,m), vtype=GRB.BINARY, name="B01")
         B10 = model.addMVar((m,m), vtype=GRB.BINARY, name="B10")
         B11 = model.addMVar((m,m), vtype=GRB.BINARY, name="B11")
 
-        # Add constraints to enforce that X is conflict-free for each pair of columns (p, q) 
         model.addConstrs(-1 * X[i, p] + X[i, q] <= B01[p,q] for p in range(m) for q in range(p+1, m) for i in range(n)) # (1)
         model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (2)
         model.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
@@ -96,16 +96,15 @@ def FindOpt():
         sig = model.ObjVal
         return sig
 
-    # This should never happen
     except GurobiError as ex:
         print(f"*********ERROR*********\n{ex}")
         return -1
 
 """
-Returns False if row u is essentially less than some v in Vset, True otherwise. 
+Given integer, u, list of integers, Vset, and integer sig, EssILP(u, Vset, sig)
+returns False if row u is essentially less than some v in Vset, True otherwise. 
 """
 def EssILP(u, Vset, sig):
-    # Increase EssILP count variable
     global count 
     count += 1
     try:
@@ -116,32 +115,29 @@ def EssILP(u, Vset, sig):
         model = Model("min_flip_model", env = env)
         model.Params.LogToConsole = 0
 
-        # Initialize ILP variables
         X = model.addMVar((n, m), vtype=GRB.BINARY, name="X")
         B01 = model.addMVar((m, m), vtype=GRB.BINARY, name="B01")
         B10 = model.addMVar((m, m), vtype=GRB.BINARY, name="B10")
         B11 = model.addMVar((m, m), vtype=GRB.BINARY, name="B11")
 
-        # Set objective function
         total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         model.setObjective(total, GRB.MINIMIZE)
 
-        # Add constraints to enforce that X is conflict-free for each pair of columns (p, q)
         # Numbers to the right of each constraint correspond to those in the paper 
         model.addConstrs( X[i, q]- X[i, p] <= B01[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (1)
         model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (2)
         model.addConstrs(X[i, p] + X[i, q] -1  <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))  # (4)
         
-        # Add additional vars and constraints to test for the essential partial order relation
+        
         nz = len(Vset)
         z = model.addMVar((m,nz), vtype=GRB.BINARY, name="z")
         model.update()
-        for i in range(m):
-            for v_index in range(nz):
-                v = list(Vset)[v_index]
-                model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (6)
-                model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (6)
+        # Test for EO
+        for v_index in range(nz):
+            v = list(Vset)[v_index]
+            model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (6)
+            model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (6)
         
         for v in range(nz):
             model.addConstr(sum(z[i, v] for i in range(m) ) >= 1)   # (7)
@@ -151,19 +147,17 @@ def EssILP(u, Vset, sig):
         model.update()
         model.optimize()
 
-        # The model is infeasible, so u is essentially less than some v in Vset
+        
         if model.Status == 3:
             return False
-        # The model is feasible, so u is NOT essentially less than all v in Vset
         else:
             return True
     
-    # This should never happen
     except GurobiError as ex:
         print(f"*********ERROR*********\n{ex}")
 
 """
-Splits a set V into two (approximately) equally-sized subsets and returns both subsets. 
+Given a set of integers, V, Split(V) returns V partitioned into 2 subsets. 
 """
 def Split(V):
     V = list(V)
@@ -190,12 +184,9 @@ Returns the essential order relation of an input D matrix.
 """
 def GetEssential():
     sig = FindOpt()
-    # The set of all 0-based row indices
     S = {num for num in range(D.shape[0])}
-    # Initialize set of essential order relations
     ess_set = set()
 
-    # Find all essential order relations for each row u
     R = []
     for u in S:
         V = S.difference({u})
@@ -232,13 +223,11 @@ def GenGraph(graphColor):
     # Specify the resolution of the graph 
     dot.attr(dpi='1000')
     
-    # Label nodes and edges
     for node in Graph.nodes():
         dot.node(node, label=None)
     for edge in Graph.edges():
         dot.edge(str(edge[0]), str(edge[1]))
 
-    # Save and render the graph
     dot.render(f"{outputName}_kappa{kappa}", format='png', cleanup=True)
     return Graph
 
@@ -252,15 +241,14 @@ def Width(G):
             max = len(x)
     return max
 
-# Name the output results file
 fileResults = outputName + "_kappa" + str(kappa) + ".txt"
 
-# Prompt user for the color of the graph nodes
-print("\nThe color of the graph nodes must be one of the options listed at \nhttps://graphviz.org/doc/info/colors.html.")
-graphColor = input("\nEnter color of graph nodes: ")
-G = GenGraph(graphColor)
+choice = input("\nColor graph? (Y/N): ")
+if choice.lower() == "n": 
+    G = GenGraph("none")
+if choice.lower() == "y":
+    G = GenGraph(input("\nEnter color (https://graphviz.org/doc/info/colors.html): "))
 
-# Write results to file if user requests file output
 if verbose:
     f = open(fileResults, "a")
     f.write(f"kappa: {kappa}\n")
@@ -271,9 +259,7 @@ if verbose:
     f.write(f"Number of Nodes: {G.number_of_nodes()}\n")
     f.write(f"Poset Width: {Width(G)}\n")
     f.write(f"Essential Relation: {[edge for edge in G.edges]}\n\n")
-    # Inform the user of the name of the results .txt file
-    print(f"\nResults were written to: {fileResults}")
+    print(f"\nResults written to file: {fileResults}")
     f.close()
 
-# Inform the user of the name of the graph .png file
-print(f"\nGraph was generated: {outputName}_kappa{kappa}.png")
+print(f"\nGraph generated: {outputName}_kappa{kappa}.png")
