@@ -134,10 +134,11 @@ def EssILP(u, Vset, sig):
         z = model.addMVar((m,nz), vtype=GRB.BINARY, name="z")
         model.update()
         # Test for EO
-        for v_index in range(nz):
-            v = list(Vset)[v_index]
-            model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (6)
-            model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (6)
+        for i in range(m):
+            for v_index in range(nz):
+                v = list(Vset)[v_index]
+                model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (6)
+                model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (6)
         
         for v in range(nz):
             model.addConstr(sum(z[i, v] for i in range(m) ) >= 1)   # (7)
