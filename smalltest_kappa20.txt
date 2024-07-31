@@ -1,0 +1,27 @@
+kappa: 20
+n (number of samples): 4
+m (number of mutations): 4
+TestEss calls: 12
+Runtime: 0.6859190464019775 seconds
+Number of Nodes: 4
+Poset Width: 2
+Essential Relation: [('1', '2'), ('1', '0'), ('0', '3')]
+
+kappa: 20
+n (number of samples): 4
+m (number of mutations): 4
+EssILP calls: 12
+Runtime: 3.636353015899658 seconds
+Number of Nodes: 4
+Poset Width: 2
+Essential Relation: [('1', '2'), ('1', '0'), ('0', '3')]
+
+kappa: 20
+n (number of samples): 4
+m (number of mutations): 4
+EssILP calls: 12
+Runtime: 15.780922889709473 seconds
+Number of Nodes: 4
+Poset Width: 2
+Essential Relation: [('1', '2'), ('1', '0'), ('0', '3')]
+
