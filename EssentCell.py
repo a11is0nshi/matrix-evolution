@@ -97,16 +97,18 @@ def FindOpt():
         model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (2)
         model.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))  # (4)
-        model.addConstrs(sum(sum((1 - X[i, j]) * D[i,j] == kappa for j in range(m)) for i in range(n))) # (5) updated on 8/5
+        # model.addConstrs(sum(sum((1 - X[i, j]) * D[i,j] == kappa for j in range(m)) for i in range(n))) # (5) updated on 8/5
+        model.addConstr(sum((1 - X[i, j]) * D[i, j] for i in range(n) for j in range(m)) == kappa, name="global_constraint") # 8/5 test
 
         for i in range(D.shape[0]-1): 
             if np.all(D[i] == D[i+1]):
-                y = model.addMVar((1, m), vtype=GRB.BINARY, name=f"y{i}")   # y-vars, added on 8/5
-                model.addConstrs(y[1,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
-                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[l] for l in range(1, j)) for j in range(m)) (8) # (8)
+                y = model.addMVar((1,m), vtype=GRB.BINARY, name=f"y{i}")   # y-vars, added on 8/5
+                model.addConstrs(y[0,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
+                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[0,l] for l in range(j-1)) for j in range(m)) (8) # (8)
 
         model.optimize()
         sig = model.ObjVal
+        print(f"sig: {sig}")
         return sig
 
     except GurobiError as ex:
@@ -143,14 +145,14 @@ def EssILP(u, Vset, sig,):
         model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (2)
         model.addConstrs(X[i, p] + X[i, q] -1  <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))  # (4)
-        model.addConstrs(sum(sum((1 - X[i, j]) * D[i,j] == kappa for j in range(m))) for i in range(n)) # (5) updated on 8/5
+        model.addConstr(sum((1 - X[i, j]) * D[i, j] for i in range(n) for j in range(m)) == kappa, name="global_constraint") # 8/5 test
 
         
         for i in range(D.shape[0]-1): 
             if np.all(D[i] == D[i+1]):
                 y = model.addMVar((1, m), vtype=GRB.BINARY, name=f"y{i}")   # y-vars, added on 8/5
-                model.addConstrs(y[1,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
-                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[l] for l in range(1, j)) for j in range(m)) (8) # (8)
+                model.addConstrs(y[0,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
+                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[0,l] for l in range(j-1)) for j in range(m)) (8) # (8)
 
         nz = len(Vset)
         z = model.addMVar((m,nz), vtype=GRB.BINARY, name="z")
