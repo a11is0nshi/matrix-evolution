@@ -42,14 +42,21 @@ outputName = fileName[:-4]
 kappa = int(input("\nEnter positive integer, kappa = "))
 askVerbose = input("\nVerbose detail file? (Y/N): ")
 verbose = askVerbose.lower().strip() == "y"
-
+fileName = "smalltest.csv"
 count = 0
 
 df = pd.read_csv(fileName)
 E = df.to_numpy()
 
-df.drop_duplicates(inplace=True)
-D = df.to_numpy(dtype=int)
+n = E.shape[0] 
+m = E.shape[1]
+
+rows = np.lexsort(np.rot90(E))
+D = np.zeros((n, m), dtype=int)
+for i in range(rows.size): 
+  row = rows[i]
+  D[i] = (E[rows[i]])
+print(D)
 
 # Calculate the multiplicities of each row i in D
 M = {}
@@ -60,8 +67,6 @@ for i in range(D.shape[0]):
             dups += 1
     M[i] = dups
 
-n = D.shape[0] 
-m = D.shape[1]
 
 start_time = time.time()
 
