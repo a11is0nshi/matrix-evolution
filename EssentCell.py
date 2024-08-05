@@ -56,16 +56,16 @@ D = np.zeros((n, m), dtype=int)
 for i in range(rows.size): 
   row = rows[i]
   D[i] = (E[rows[i]])
-print(D)
+# 
+# # Calculate the multiplicities of each row i in D
+# M = {}
+# for i in range(D.shape[0]):
+#     dups = 0
+#     for x in range(E.shape[0]):
+#         if np.all(D[i] == E[x]):
+#             dups += 1
+#     M[i] = dups
 
-# Calculate the multiplicities of each row i in D
-M = {}
-for i in range(D.shape[0]):
-    dups = 0
-    for x in range(E.shape[0]):
-        if np.all(D[i] == E[x]):
-            dups += 1
-    M[i] = dups
 
 
 start_time = time.time()
@@ -85,7 +85,8 @@ def FindOpt():
         # X will be constrained to be a conflict-free matrix
         X = model.addMVar((n,m), vtype=GRB.BINARY, name="X")
 
-        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        # total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        total = sum(sum((1 - D[i,j]) * X[i, j] for j in range(m)) for i in range(n)) # new obj function 8/5
         model.setObjective(total, GRB.MINIMIZE)
         
         B01 = model.addMVar((m,m), vtype=GRB.BINARY, name="B01")
@@ -96,7 +97,14 @@ def FindOpt():
         model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (2)
         model.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))  # (4)
-        
+        model.addConstrs(sum(sum((1 - X[i, j]) * D[i,j] == kappa for j in range(m)) for i in range(n))) # (5) updated on 8/5
+
+        for i in range(D.shape[0]-1): 
+            if np.all(D[i] == D[i+1]):
+                y = model.addMVar((1, m), vtype=GRB.BINARY, name=f"y{i}")   # y-vars, added on 8/5
+                model.addConstrs(y[1,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
+                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[l] for l in range(1, j)) for j in range(m)) (8) # (8)
+
         model.optimize()
         sig = model.ObjVal
         return sig
@@ -109,7 +117,8 @@ def FindOpt():
 Given integer, u, list of integers, Vset, and integer sig, EssILP(u, Vset, sig)
 returns False if row u is essentially less than some v in Vset, True otherwise. 
 """
-def EssILP(u, Vset, sig):
+def EssILP(u, Vset, sig,):
+    global D
     global count 
     count += 1
     try:
@@ -125,7 +134,8 @@ def EssILP(u, Vset, sig):
         B10 = model.addMVar((m, m), vtype=GRB.BINARY, name="B10")
         B11 = model.addMVar((m, m), vtype=GRB.BINARY, name="B11")
 
-        total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        # total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
+        total = sum(sum((1 - D[i,j]) * X[i, j] for j in range(m)) for i in range(n)) # new obj function 8/5
         model.setObjective(total, GRB.MINIMIZE)
 
         # Numbers to the right of each constraint correspond to those in the paper 
@@ -133,22 +143,31 @@ def EssILP(u, Vset, sig):
         model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (2)
         model.addConstrs(X[i, p] + X[i, q] -1  <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))  # (4)
+        model.addConstrs(sum(sum((1 - X[i, j]) * D[i,j] == kappa for j in range(m))) for i in range(n)) # (5) updated on 8/5
+
         
-        
+        for i in range(D.shape[0]-1): 
+            if np.all(D[i] == D[i+1]):
+                y = model.addMVar((1, m), vtype=GRB.BINARY, name=f"y{i}")   # y-vars, added on 8/5
+                model.addConstrs(y[1,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
+                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[l] for l in range(1, j)) for j in range(m)) (8) # (8)
+
         nz = len(Vset)
         z = model.addMVar((m,nz), vtype=GRB.BINARY, name="z")
         model.update()
+
         # Test for EO
         for i in range(m):
             for v_index in range(nz):
                 v = list(Vset)[v_index]
-                model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (6)
-                model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (6)
+                model.addConstr(X[u, i] - X[v, i] <= z[i, v_index])         # (10)
+                model.addConstr(z[i, v_index] <= (X[u, i] - X[v, i] + 1)/2) # (10)
         
         for v in range(nz):
-            model.addConstr(sum(z[i, v] for i in range(m) ) >= 1)   # (7)
-
-        model.addConstr(sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n)) == sig) # (8)
+            model.addConstr(sum(z[i, v] for i in range(m) ) >= 1)   # (11)
+        
+        model.addConstrs(sum(sum((1 - D[i, j]) * X[i, j] for i in range(n)) for j in range(m))) # (12) 8/5
+            # model.addConstr(sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n)) == sig) # (8)
 
         model.update()
         model.optimize()
