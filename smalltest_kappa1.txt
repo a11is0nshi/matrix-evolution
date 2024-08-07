@@ -1,0 +1,9 @@
+kappa: 1
+n (number of samples): 6
+m (number of mutations): 4
+EssILP calls: 26
+Runtime: 4.50127911567688 seconds
+Number of Nodes: 5
+Poset Width: 4
+Essential Relation: [('0', '5'), ('0', '1'), ('0', '2'), ('0', '3, 4')]
+

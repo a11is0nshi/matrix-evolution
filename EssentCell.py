@@ -98,15 +98,27 @@ def FindOpt():
         model.addConstrs(X[i, p] + X[i, q] - 1 <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))  # (4)
         # model.addConstrs(sum(sum((1 - X[i, j]) * D[i,j] == kappa for j in range(m)) for i in range(n))) # (5) updated on 8/5
-        model.addConstr(sum((1 - X[i, j]) * D[i, j] for i in range(n) for j in range(m)) == kappa, name="global_constraint") # 8/5 test
+        glb_cons = model.addConstr(sum((1 - X[i, j]) * D[i, j] for i in range(n) for j in range(m)) == kappa, name="global_constraint") # 8/5 test
+        model.update()
+        print("printing global_constraint")
+        print(f"{model.getRow(glb_cons)} {glb_cons.Sense} {glb_cons.RHS}")
 
         for i in range(D.shape[0]-1): 
             if np.all(D[i] == D[i+1]):
                 y = model.addMVar((1,m), vtype=GRB.BINARY, name=f"y{i}")   # y-vars, added on 8/5
-                model.addConstrs(y[0,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
-                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[0,l] for l in range(j-1)) for j in range(m)) (8) # (8)
+                X_i_initial = model.addConstr(X[i, 0] - X[i + 1, 0] <= 0, name=f"X_{i}_initial")
+                y_i_j = model.addConstrs(y[0,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
+                last = model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[0,l] for l in range(j)) for j in range(1, m)) # (8)
+                model.update()
+                print(f"printing duplicate row constraints for {i} and {i + 1}")
+                print(f"{model.getRow(X_i_initial)} {X_i_initial.Sense} {X_i_initial.RHS}")
+                for key, value in y_i_j.items():
+                    print(f"{model.getRow(value)} {value.Sense} {value.RHS}")
+                for key, value in last.items():
+                    print(f"{model.getRow(value)} {value.Sense} {value.RHS}")
 
         model.optimize()
+        model.write("model.lp")
         sig = model.ObjVal
         print(f"sig: {sig}")
         return sig
@@ -139,20 +151,35 @@ def EssILP(u, Vset, sig,):
         # total = sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa*M[i]*(D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n))
         total = sum(sum((1 - D[i,j]) * X[i, j] for j in range(m)) for i in range(n)) # new obj function 8/5
         model.setObjective(total, GRB.MINIMIZE)
+        print("printing minimizing objective")
+        print(model.getObjective())
 
         # Numbers to the right of each constraint correspond to those in the paper 
         model.addConstrs( X[i, q]- X[i, p] <= B01[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (1)
         model.addConstrs(X[i, p] - X[i, q] <= B10[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (2)
         model.addConstrs(X[i, p] + X[i, q] -1  <= B11[p,q] for p in range(m) for q in range(p+1, m) for i in range(n))  # (3)
         model.addConstrs(B01[p,q] + B10[p,q] + B11[p,q] <= 2 for p in range(m) for q in range(p+1, m))  # (4)
-        model.addConstr(sum((1 - X[i, j]) * D[i, j] for i in range(n) for j in range(m)) == kappa, name="global_constraint") # 8/5 test
+        glb_cons = model.addConstr(sum((1 - X[i, j]) * D[i, j] for i in range(n) for j in range(m)) == kappa, name="global_constraint") # 8/5 test
 
+        model.update()
+        print("printing global_constraint in an essential ILP call")
+        print(f"{model.getRow(glb_cons)} {glb_cons.Sense} {glb_cons.RHS}")
         
         for i in range(D.shape[0]-1): 
             if np.all(D[i] == D[i+1]):
                 y = model.addMVar((1, m), vtype=GRB.BINARY, name=f"y{i}")   # y-vars, added on 8/5
-                model.addConstrs(y[0,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
-                model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[0,l] for l in range(j-1)) for j in range(m)) (8) # (8)
+                X_i_initial = model.addConstr(X[i, 0] - X[i+1, 0] <= 0, name=f"X_{i}_initial")
+                y_i_j = model.addConstrs(y[0,j] <= (X[i+1, j] - X[i,j] +1)/2 for j in range(m)) # (7)
+                last = model.addConstrs(X[i,j] - X[i+1, j] <= sum(y[0,l] for l in range(j)) for j in range(1, m))  # (8)
+                model.update()
+                print(f"printing duplicate row constraints for {i} and {i+1}")
+                print(f"{model.getRow(X_i_initial)} {X_i_initial.Sense} {X_i_initial.RHS}")
+                for key, value in y_i_j.items():
+                    print(f"{model.getRow(value)} {value.Sense} {value.RHS}")
+                for key, value in last.items():
+                    print(f"{model.getRow(value)} {value.Sense} {value.RHS}")
+
+
 
         nz = len(Vset)
         z = model.addMVar((m,nz), vtype=GRB.BINARY, name="z")
@@ -168,7 +195,7 @@ def EssILP(u, Vset, sig,):
         for v in range(nz):
             model.addConstr(sum(z[i, v] for i in range(m) ) >= 1)   # (11)
         
-        model.addConstrs(sum(sum((1 - D[i, j]) * X[i, j] for i in range(n)) for j in range(m))) # (12) 8/5
+        model.addConstr(sum(sum((1 - D[i, j]) * X[i, j] for i in range(n)) for j in range(m)) == sig) # (12) 8/5
             # model.addConstr(sum(sum(M[i]*(1 - D[i, j])*(X[i, j]) + kappa * M[i] * (D[i, j])*(1 - X[i, j]) for j in range(m)) for i in range(n)) == sig) # (8)
 
         model.update()
